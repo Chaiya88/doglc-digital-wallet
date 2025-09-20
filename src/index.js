@@ -333,9 +333,10 @@ export default {
 
       // Traditional callback handling (fallback)
       async function handleCallbackQueryTraditional(ctx, data) {
-        const messages = ctx.messages; // Add this line to get messages from context
-        
-        // Wallet-related callbacks
+        try {
+          const messages = ctx.messages; // Add this line to get messages from context
+          
+          // Wallet-related callbacks
         if (data === 'wallet') {
           await handleWallet(ctx);
         } else if (data === 'balance') {
@@ -473,14 +474,14 @@ export default {
           await handleLanguageChangeHandler(ctx);
         }
         
-        // Answer callback query to remove loading state
-        await ctx.answerCbQuery();
-        
-      } catch (error) {
-        console.error('Callback query error:', error);
-        await ctx.answerCbQuery('เกิดข้อผิดพลาด / Error occurred');
-      }
-    });
+          // Answer callback query to remove loading state
+          await ctx.answerCbQuery();
+          
+        } catch (error) {
+          console.error('Callback query error:', error);
+          await ctx.answerCbQuery('เกิดข้อผิดพลาด / Error occurred');
+        }
+      } // Close handleCallbackQueryTraditional function
 
     // Handle language selection
     bot.action(/^lang_(.+)$/, async (ctx) => {
@@ -588,7 +589,7 @@ export default {
       
       return new Response('Internal Server Error', { status: 500 });
     }
-  },
+  }
 };
 
 // API handler for MiniApp frontend requests
@@ -601,6 +602,7 @@ async function handleAPIRequest(request, env, ctx) {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Telegram-User-Id',
+  }; // Added missing closing brace for corsHeaders object
   
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
@@ -656,7 +658,7 @@ async function handleAPIRequest(request, env, ctx) {
       { status: 500, headers: corsHeaders }
     );
   }
-}
+} // Added missing closing brace for handleAPIRequest function
 
 // API endpoint handlers for MiniApp
 async function handleWalletBalance(userId, env, corsHeaders) {
