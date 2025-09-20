@@ -1,0 +1,9 @@
+name = "doglc-simple-api"
+main = "workers/main-bot/src/simple-api.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Simple API configuration
+[vars]
+ENVIRONMENT = "development"
+WORKER_TYPE = "simple-api"

@@ -1,0 +1,52 @@
+name = "doglc-api-worker"
+main = "src/index.js"
+compatibility_date = "2024-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# API Worker - RESTful Services
+[env.production]
+name = "doglc-api-production"
+vars = { ENVIRONMENT = "production", WORKER_TYPE = "api" }
+
+[env.staging]
+name = "doglc-api-staging"
+vars = { ENVIRONMENT = "staging", WORKER_TYPE = "api" }
+
+# KV Namespaces for API
+[[kv_namespaces]]
+binding = "API_CACHE_KV"
+id = "api-cache-namespace-id"
+preview_id = "api-cache-preview-id"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "api-rate-limit-namespace-id"
+preview_id = "api-rate-limit-preview-id"
+
+# D1 Database for API data
+[[d1_databases]]
+binding = "API_DB"
+database_name = "doglc-api-db"
+database_id = "api-database-id"
+
+# Service bindings
+[[services]]
+binding = "BANKING_WORKER"
+service = "doglc-banking-worker"
+
+[[services]]
+binding = "SECURITY_WORKER"
+service = "doglc-security-worker"
+
+[[services]]
+binding = "ANALYTICS_WORKER"
+service = "doglc-analytics-worker"
+
+# Node.js compatibility
+node_compat = true
+
+# CORS configuration
+[cors]
+origins = ["*"]
+methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+headers = ["Content-Type", "Authorization"]

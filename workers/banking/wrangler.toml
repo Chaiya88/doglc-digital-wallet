@@ -1,0 +1,100 @@
+name = "doglc-banking-worker"
+main = "src/index.js"
+compatibility_date = "2024-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Banking Worker - Financial Operations
+[env.production]
+name = "doglc-banking-production"
+vars = { 
+  ENVIRONMENT = "production", 
+  WORKER_TYPE = "banking",
+  DEFAULT_THB_USDT_RATE = "36.36",
+  MIN_DEPOSIT_THB = "100.0",
+  MAX_DEPOSIT_THB = "500000.0",
+  MIN_WITHDRAWAL_USDT = "5.0", 
+  MAX_WITHDRAWAL_USDT = "50000.0",
+  DAILY_WITHDRAWAL_LIMIT = "100000.0",
+  WITHDRAWAL_FEE_PERCENTAGE = "0.5",
+  DEPOSIT_FEE_PERCENTAGE = "2.0"
+}
+
+[env.staging]
+name = "doglc-banking-staging"
+vars = { 
+  ENVIRONMENT = "staging", 
+  WORKER_TYPE = "banking",
+  DEFAULT_THB_USDT_RATE = "36.36",
+  MIN_DEPOSIT_THB = "10.0",
+  MAX_DEPOSIT_THB = "50000.0"
+}
+
+# D1 Databases for Banking Operations
+[[d1_databases]]
+binding = "MAIN_WALLET_DB"
+database_name = "doglc-wallet-main"
+database_id = "49747ab5-7e7f-4c70-abf3-84f099354cf7"
+
+[[d1_databases]]
+binding = "BANKING_SYSTEM_DB"
+database_name = "doglc-banking-system"
+database_id = "abb80d11-b1c1-499b-88d3-3df2ebbb5525"
+
+# KV Namespaces for Banking Operations (Production IDs)
+[[kv_namespaces]]
+binding = "BANKING_CACHE"
+id = "74657733c0004630b1f8a00019531d75"
+preview_id = "74657733c0004630b1f8a00019531d75"
+
+[[kv_namespaces]]
+binding = "BANK_ACCOUNT_LOOKUP"
+id = "97ac6a2c6fc84302ab7a3747e9ab59a3"
+preview_id = "97ac6a2c6fc84302ab7a3747e9ab59a3"
+
+[[kv_namespaces]]
+binding = "WALLET_CACHE"
+id = "32313031d0c64cdebba3b0a28880114f"
+preview_id = "32313031d0c64cdebba3b0a28880114f"
+
+[[kv_namespaces]]
+binding = "CONFIRMED_DEPOSITS_KV"
+id = "confirmed-deposits-namespace-id"
+preview_id = "confirmed-deposits-preview-id"
+
+# D1 Database for financial records
+[[d1_databases]]
+binding = "WALLET_DB"
+database_name = "doglc-wallet-db"
+database_id = "wallet-database-id"
+
+[[d1_databases]]
+binding = "TRANSACTION_DB"
+database_name = "doglc-transaction-db"
+database_id = "transaction-database-id"
+
+# R2 Buckets for slip images and documents
+[[r2_buckets]]
+binding = "SLIP_IMAGES_R2"
+bucket_name = "doglc-slip-images"
+preview_bucket_name = "doglc-slip-images-preview"
+
+# Queue bindings for background processing
+[[queues]]
+binding = "DEPOSIT_QUEUE"
+queue = "deposit-processing-queue"
+
+[[queues]]
+binding = "WITHDRAWAL_QUEUE"
+queue = "withdrawal-processing-queue"
+
+# Service bindings
+[[services]]
+binding = "SECURITY_WORKER"
+service = "doglc-security-worker"
+
+[[services]]
+binding = "ANALYTICS_WORKER"
+service = "doglc-analytics-worker"
+
+# Node.js compatibility
+node_compat = true

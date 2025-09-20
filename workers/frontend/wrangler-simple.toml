@@ -1,0 +1,10 @@
+name = "doglc-frontend-simple"
+main = "src/simple-frontend.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Development environment variables
+[vars]
+ENVIRONMENT = "development"
+WORKER_TYPE = "frontend"
+MAIN_BOT_URL = "http://localhost:8788"

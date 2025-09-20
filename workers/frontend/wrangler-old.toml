@@ -1,0 +1,88 @@
+name = "doglc-frontend-worker"
+main = "src/index.js"
+compatibility_date = "2024-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Frontend Worker - Telegram MiniApp Interface
+[env.production]
+name = "doglc-frontend-production"
+vars = { 
+  ENVIRONMENT = "production", 
+  WORKER_TYPE = "frontend",
+  MAIN_BOT_URL = "https://doglc-main-bot.your-worker.workers.dev",
+  TELEGRAM_BOT_TOKEN = "",
+  ALLOWED_ORIGINS = "https://web.telegram.org"
+}
+
+[env.staging]
+name = "doglc-frontend-staging"
+vars = { 
+  ENVIRONMENT = "staging", 
+  WORKER_TYPE = "frontend",
+  MAIN_BOT_URL = "https://doglc-main-bot-staging.your-worker.workers.dev",
+  TELEGRAM_BOT_TOKEN = "",
+  ALLOWED_ORIGINS = "https://web.telegram.org,http://localhost:8787"
+}
+
+# KV Namespaces for Frontend
+[[kv_namespaces]]
+binding = "FRONTEND_CACHE_KV"
+id = "frontend-cache-namespace-id"
+preview_id = "frontend-cache-preview-id"
+
+[[kv_namespaces]]
+binding = "SESSION_KV"
+id = "frontend-session-namespace-id"
+preview_id = "frontend-session-preview-id"
+
+# D1 Database for frontend data
+[[d1_databases]]
+binding = "FRONTEND_DB"
+database_name = "doglc-frontend-db"
+database_id = "frontend-database-id"
+
+# R2 Buckets for static assets
+[[r2_buckets]]
+binding = "STATIC_ASSETS_R2"
+bucket_name = "doglc-static-assets"
+preview_bucket_name = "doglc-static-assets-preview"
+
+[[r2_buckets]]
+binding = "USER_UPLOADS_R2"
+bucket_name = "doglc-user-uploads"
+preview_bucket_name = "doglc-user-uploads-preview"
+
+# Service bindings
+[[services]]
+binding = "API_WORKER"
+service = "doglc-api-worker"
+
+[[services]]
+binding = "BANKING_WORKER"
+service = "doglc-banking-worker"
+
+[[services]]
+binding = "SECURITY_WORKER"
+service = "doglc-security-worker"
+
+[[services]]
+binding = "ANALYTICS_WORKER"
+service = "doglc-analytics-worker"
+
+# Asset configuration for static files
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Browser rendering for PDF generation
+[browser]
+binding = "BROWSER"
+
+# Node.js compatibility
+node_compat = true
+
+# CORS configuration
+[cors]
+origins = ["*"]
+methods = ["GET", "POST", "OPTIONS"]
+headers = ["Content-Type", "Authorization", "X-Requested-With"]

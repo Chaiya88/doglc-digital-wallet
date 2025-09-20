@@ -1,0 +1,28 @@
+{
+  "name": "doglc-analytics-worker",
+  "version": "1.0.0",
+  "description": "DOGLC Digital Wallet - Analytics and Monitoring Worker",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "d3": "^7.9.0",
+    "chart.js": "^4.4.4"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.10",
+    "vitest": "^2.1.1",
+    "@types/d3": "^7.4.3"
+  },
+  "keywords": ["analytics", "monitoring", "metrics", "cloudflare", "workers"],
+  "author": "DOGLC Digital Wallet Team",
+  "license": "MIT"
+}

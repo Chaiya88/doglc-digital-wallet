@@ -1,0 +1,38 @@
+{
+  "name": "doglc-frontend-worker",
+  "version": "1.0.0",
+  "description": "DOGLC Digital Wallet - Frontend Web Application Worker",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "test": "vitest",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "hono": "^4.6.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.9",
+    "@types/react-dom": "^18.3.0",
+    "vite": "^5.4.8",
+    "vitest": "^2.1.1",
+    "wrangler": "^4.38.0"
+  },
+  "keywords": [
+    "frontend",
+    "react",
+    "web-app",
+    "cloudflare",
+    "workers"
+  ],
+  "author": "DOGLC Digital Wallet Team",
+  "license": "MIT"
+}

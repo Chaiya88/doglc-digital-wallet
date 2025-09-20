@@ -1,0 +1,93 @@
+name = "doglc-main-bot-worker"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Main Bot Worker - Telegram Bot Interface
+[env.production]
+name = "doglc-main-bot-production"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+WORKER_TYPE = "main-bot"
+DEFAULT_LANGUAGE = "th"
+SUPPORTED_LANGUAGES = "th,en,zh,km,ko,id"
+OCR_ENABLED = "true"
+MIN_DEPOSIT_THB = "100.0"
+MAX_DEPOSIT_THB = "500000.0"
+DAILY_WITHDRAWAL_LIMIT = "100000.0"
+WITHDRAWAL_FEE_PERCENTAGE = "0.5"
+SLIP_VERIFICATION_ENABLED = "true"
+AUTO_SLIP_VERIFICATION = "true"
+
+[env.staging]
+name = "doglc-main-bot-staging"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+WORKER_TYPE = "main-bot"
+
+# KV Namespaces for Main Bot (Production IDs)
+[[kv_namespaces]]
+binding = "USER_SESSIONS"
+id = "cfe9a09ceea142728bb949be6a165296"
+preview_id = "cfe9a09ceea142728bb949be6a165296"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "0a3ec022e9b14774ba5791e5d5f0f6b7"
+preview_id = "0a3ec022e9b14774ba5791e5d5f0f6b7"
+
+[[kv_namespaces]]
+binding = "BOT_CONFIG_KV"
+id = "31f813fdf51743a0a96a7dc22b45f22c"
+preview_id = "31f813fdf51743a0a96a7dc22b45f22c"
+
+[[kv_namespaces]]
+binding = "BOT_SESSION_MANAGER"
+id = "9571bdf53290445f9e480aeababb6b08"
+preview_id = "9571bdf53290445f9e480aeababb6b08"
+
+[[kv_namespaces]]
+binding = "USER_TEMP_DATA"
+id = "783698b2a5274af9a67ce33acf3e5144"
+preview_id = "783698b2a5274af9a67ce33acf3e5144"
+
+[[kv_namespaces]]
+binding = "SLIP_IMAGES"
+id = "d3148c4f344249f19f32682fb5f6a8ca"
+preview_id = "d3148c4f344249f19f32682fb5f6a8ca"
+
+[[kv_namespaces]]
+binding = "SLIP_IMAGES_METADATA"
+id = "7dd86eee2ed241fca77d165310f54fb6"
+preview_id = "7dd86eee2ed241fca77d165310f54fb6"
+
+# Service bindings to other workers
+[[services]]
+binding = "BANKING_WORKER"
+service = "doglc-banking-worker"
+
+[[services]]
+binding = "SECURITY_WORKER"
+service = "doglc-security-worker"
+
+[[services]]
+binding = "API_WORKER"
+service = "doglc-api-worker"
+
+[[services]]
+binding = "ANALYTICS_WORKER"
+service = "doglc-analytics-worker"
+
+# Durable Objects for real-time features
+[[durable_objects.bindings]]
+name = "USER_SESSION_MANAGER"
+class_name = "UserSessionManager"
+
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiterDurableObject"
+
+# Node.js compatibility
+node_compat = true

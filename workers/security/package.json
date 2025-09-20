@@ -1,0 +1,29 @@
+{
+  "name": "doglc-security-worker",
+  "version": "1.0.0",
+  "description": "DOGLC Digital Wallet - Security and OCR Worker",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "tesseract.js": "^5.1.1",
+    "@google-cloud/vision": "^4.3.2",
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.10",
+    "vitest": "^2.1.1",
+    "@types/crypto-js": "^4.2.2"
+  },
+  "keywords": ["security", "ocr", "fraud-detection", "cloudflare", "workers"],
+  "author": "DOGLC Digital Wallet Team",
+  "license": "MIT"
+}

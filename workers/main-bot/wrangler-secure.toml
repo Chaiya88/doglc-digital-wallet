@@ -1,0 +1,9 @@
+name = "doglc-secure-backend"
+main = "src/secure-api.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Development environment variables
+[vars]
+ENVIRONMENT = "development"
+WORKER_TYPE = "secure-backend"

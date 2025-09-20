@@ -1,0 +1,28 @@
+{
+  "name": "doglc-banking-worker",
+  "version": "1.0.0",
+  "description": "DOGLC Digital Wallet - Banking Operations Worker",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "decimal.js": "^10.4.3",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.10",
+    "vitest": "^2.1.1",
+    "@types/uuid": "^10.0.0"
+  },
+  "keywords": ["banking", "finance", "cloudflare", "workers", "digital-wallet"],
+  "author": "DOGLC Digital Wallet Team",
+  "license": "MIT"
+}

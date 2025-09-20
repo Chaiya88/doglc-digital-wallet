@@ -1,0 +1,42 @@
+{
+  "name": "doglc-digital-wallet",
+  "version": "1.0.0",
+  "description": "Digital wallet Telegram Bot with Thai language support for Cloudflare Workers",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler deploy --env production",
+    "test": "node tests/system.test.js",
+    "lint": "eslint src/**/*.js",
+    "format": "prettier --write src/**/*.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.15.0",
+    "@cloudflare/workers-types": "^4.20231121.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.0",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/doglc-digital-wallet.git"
+  },
+  "keywords": [
+    "telegram-bot",
+    "digital-wallet",
+    "cloudflare-workers",
+    "thai-language",
+    "cryptocurrency",
+    "fintech"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

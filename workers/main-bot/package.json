@@ -1,0 +1,33 @@
+{
+  "name": "doglc-main-bot-worker",
+  "version": "1.0.0",
+  "description": "DOGLC Digital Wallet - Main Telegram Bot Worker",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "hono": "^4.9.8",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.1",
+    "wrangler": "^4.38.0"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "cloudflare",
+    "workers",
+    "digital-wallet"
+  ],
+  "author": "DOGLC Digital Wallet Team",
+  "license": "MIT"
+}

@@ -1,0 +1,251 @@
+name = "doglc-digital-wallet"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Enhanced Cloudflare Workers configuration with banking operations support
+[env.staging]
+name = "doglc-digital-wallet-staging"
+vars = { ENVIRONMENT = "staging", DEBUG_MODE = "true", LOG_LEVEL = "debug" }
+
+[env.production]
+name = "doglc-digital-wallet-production" 
+vars = { ENVIRONMENT = "production", DEBUG_MODE = "false", LOG_LEVEL = "info" }
+
+# Enhanced KV Namespaces for comprehensive functionality
+[[kv_namespaces]]
+binding = "CONFIG_KV"
+id = "your-config-kv-namespace-id"
+preview_id = "your-preview-config-kv-id"
+
+[[kv_namespaces]]
+binding = "RATE_KV"
+id = "your-rate-kv-namespace-id"
+preview_id = "your-preview-rate-kv-id"
+
+[[kv_namespaces]]
+binding = "USER_SESSIONS"
+id = "your-user-sessions-namespace-id"
+preview_id = "your-preview-user-sessions-id"
+
+[[kv_namespaces]]
+binding = "MARKET_DATA_CACHE"
+id = "your-market-data-cache-namespace-id"
+preview_id = "your-preview-market-data-cache-id"
+
+[[kv_namespaces]]
+binding = "SLIP_IMAGES"
+id = "your-slip-images-namespace-id"
+preview_id = "your-preview-slip-images-id"
+
+[[kv_namespaces]]
+binding = "AUDIT_LOG_KV"
+id = "your-audit-log-kv-namespace-id"
+preview_id = "your-preview-audit-log-kv-id"
+
+# Enhanced KV for advanced features
+[[kv_namespaces]]
+binding = "USER_ACTIVITY_KV"
+id = "user-activity-store-id"
+preview_id = "user-activity-store-preview-id"
+
+[[kv_namespaces]]
+binding = "PERFORMANCE_KV"
+id = "performance-metrics-store-id"
+preview_id = "performance-metrics-store-preview-id"
+
+[[kv_namespaces]]
+binding = "OCR_LOG_KV"
+id = "ocr-processing-log-store-id"
+preview_id = "ocr-processing-log-store-preview-id"
+
+[[kv_namespaces]]
+binding = "GMAIL_LOG_KV"
+id = "gmail-webhook-log-store-id"
+preview_id = "gmail-webhook-log-store-preview-id"
+
+[[kv_namespaces]]
+binding = "DEPOSIT_REQUESTS_KV"
+id = "deposit-requests-store-id"
+preview_id = "deposit-requests-store-preview-id"
+
+[[kv_namespaces]]
+binding = "CONFIRMED_DEPOSITS_KV"
+id = "confirmed-deposits-store-id"
+preview_id = "confirmed-deposits-store-preview-id"
+
+[[kv_namespaces]]
+binding = "SECURITY_EVENTS_KV"
+id = "security-events-store-id"
+preview_id = "security-events-store-preview-id"
+
+# Enhanced D1 databases for comprehensive data management
+[[d1_databases]]
+binding = "WALLET_DB"
+database_name = "doglc-wallet-db"
+database_id = "your-d1-database-id"
+
+[[d1_databases]]
+binding = "ANALYTICS_DB"
+database_name = "doglc-analytics-db"
+database_id = "your-analytics-db-id"
+
+[[d1_databases]]
+binding = "DOGLC_DB"
+database_name = "doglc-main-db"
+database_id = "doglc-main-database-id"
+
+# Enhanced R2 buckets for file storage and backups
+[[r2_buckets]]
+binding = "WALLET_BUCKET"
+bucket_name = "doglc-wallet-files"
+
+[[r2_buckets]]
+binding = "BACKUP_BUCKET"
+bucket_name = "doglc-wallet-backups"
+
+[[r2_buckets]]
+binding = "SLIP_IMAGES_R2"
+bucket_name = "doglc-slip-images"
+preview_bucket_name = "doglc-slip-images-preview"
+
+[[r2_buckets]]
+binding = "DOCUMENTS_R2"
+bucket_name = "doglc-documents"
+preview_bucket_name = "doglc-documents-preview"
+
+# Enhanced Durable Objects for real-time features and state management
+[[durable_objects.bindings]]
+name = "WALLET_DO"
+class_name = "WalletDurableObject"
+
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiterDurableObject"
+
+[[durable_objects.bindings]]
+name = "USER_SESSION_MANAGER"
+class_name = "UserSessionManager"
+
+# Enhanced Service bindings for multi-worker architecture
+[[services]]
+binding = "BANKING_WORKER"
+service = "doglc-banking-worker"
+
+[[services]]
+binding = "SECURITY_WORKER"
+service = "doglc-security-worker"
+
+[[services]]
+binding = "FRONTEND_WORKER"
+service = "doglc-frontend-worker"
+
+[[services]]
+binding = "ANALYTICS_WORKER"
+service = "doglc-analytics-worker"
+
+[[services]]
+binding = "OCR_WORKER"
+service = "doglc-ocr-worker"
+
+# Queue bindings for background processing
+[[queues.producers]]
+binding = "DEPOSIT_QUEUE"
+queue = "deposit-processing-queue"
+
+[[queues.producers]]
+binding = "WITHDRAWAL_QUEUE"
+queue = "withdrawal-processing-queue"
+
+[[queues.producers]]
+binding = "NOTIFICATION_QUEUE"
+queue = "notification-queue"
+
+[[queues.producers]]
+binding = "OCR_QUEUE"
+queue = "ocr-processing-queue"
+
+[[queues.producers]]
+binding = "GMAIL_QUEUE"
+queue = "gmail-webhook-queue"
+
+# Vectorize for AI/ML features
+[[vectorize]]
+binding = "FRAUD_DETECTION_AI"
+index_name = "fraud-detection-vectors"
+
+[[vectorize]]
+binding = "OCR_AI_VECTORS"
+index_name = "ocr-pattern-vectors"
+
+# Analytics Engine for comprehensive data analysis
+[[analytics_engine_datasets]]
+binding = "TRANSACTION_ANALYTICS"
+dataset = "transaction_data"
+
+[[analytics_engine_datasets]]
+binding = "USER_BEHAVIOR_ANALYTICS"
+dataset = "user_behavior_data"
+
+[[analytics_engine_datasets]]
+binding = "SECURITY_ANALYTICS"
+dataset = "security_events_data"
+
+# Browser rendering for receipt generation and OCR processing
+[browser]
+binding = "BROWSER"
+
+# Email configuration for notifications
+[email]
+binding = "EMAIL"
+destination_address = "support@doglc.digital"
+
+# Hyperdrive for database acceleration (optional)
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "your-hyperdrive-config-id"
+
+# AI binding for enhanced fraud detection
+[ai]
+binding = "AI"
+
+# Placement configuration for optimal performance
+[placement]
+mode = "smart"
+
+# Build configuration
+[build]
+command = "npm run build"
+cwd = "."
+watch_dir = ["src"]
+
+# Node.js compatibility for crypto and other modules
+node_compat = true
+
+# Workers limits and pricing tier
+[limits]
+cpu_ms = 30000  # 30 seconds max execution time
+
+# Asset configuration for static files
+# Durable Objects migrations
+[[migrations]]
+tag = "v1"
+new_classes = ["WalletDurableObject", "RateLimiterDurableObject", "UserSessionManager"]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Tail configuration for enhanced debugging
+[tail]
+filters = [
+  { outcome = "exception" },
+  { outcome = "ok", level = "error" },
+  { outcome = "cancelled" },
+  { sampling_rate = 0.1 }
+]
+
+# Observability configuration
+[observability]
+enabled = true
+head_sampling_rate = 0.01
