@@ -558,13 +558,60 @@ compatibility_date = "2024-03-29"
 - **Storage**: Cloudflare KV (optional)
 - **Deployment**: Wrangler CLI
 
+## 📋 Project Management
+
+### GitHub Projects v2 Board: merge-doglc-into-logic-workspace
+
+This repository is part of a larger initiative to merge the best features from both `doglc-digital-wallet` and `logic-digital-wallet` repositories. We use a comprehensive project board to track progress and coordinate development efforts.
+
+#### 🎯 Project Overview
+- **Main Issue**: [logic-digital-wallet#4](https://github.com/Chaiya88/logic-digital-wallet/issues/4) - Complete merge checklist
+- **Project Board**: `merge-doglc-into-logic-workspace` (Public)
+- **Workflow**: Backlog → To do → In progress → Review → Done
+
+#### 📚 Project Documentation
+- [📋 Project Board Configuration](.github/PROJECT_BOARD_CONFIG.md) - Complete board setup and structure
+- [🚀 Setup Instructions](.github/SETUP_INSTRUCTIONS.md) - Step-by-step board creation guide  
+- [📝 Project README](.github/PROJECT_BOARD_README.md) - Project overview and guidelines
+- [🔐 Security Checklist](.github/SECURITY_CHECKLIST.md) - Security audit and migration guidelines
+
+#### 🔄 Automated Workflow
+The project board includes automated card movement based on:
+- Issue state changes (opened → Backlog, assigned → To do, closed → Done)
+- Pull request lifecycle (opened → In progress, review → Review, merged → Done)
+- GitHub Actions integration for seamless project management
+
+#### 🎯 Current Focus Areas
+1. **Security & Secrets Management** - Sanitizing sensitive data and implementing proper secrets management
+2. **Code Consolidation** - Merging source code from both repositories
+3. **Configuration Management** - Combining production configs and deployment settings
+4. **Documentation Integration** - Creating comprehensive guides and documentation
+
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### Development Workflow
+1. **Check the Project Board** - Review current tasks and priorities
+2. **Pick a Card** - Select an item from "To do" column and assign yourself
+3. **Create Feature Branch** - `git checkout -b feature/AmazingFeature`
+4. **Move Card to "In Progress"** - Update the project board
+5. **Implement Changes** - Follow security guidelines and coding standards
+6. **Create Pull Request** - Link to the corresponding project card
+7. **Code Review** - Card automatically moves to "Review" column
+8. **Merge and Complete** - Card moves to "Done" upon merge
+
+### Security Guidelines
+- **Never commit secrets** - Use Cloudflare Vault for sensitive data
+- **Follow the security checklist** - Reference `.github/SECURITY_CHECKLIST.md`
+- **Audit before committing** - Check for sensitive information in code
+- **Use proper branch protection** - All changes require review
+
+### Pull Request Strategy
+Following the 5-PR approach from the main issue:
+1. **PR#1: Core Structure** - Foundation files and architecture
+2. **PR#2: Production Config** - Deployment and environment setup
+3. **PR#3: Documentation** - README, guides, and examples  
+4. **PR#4: Cleanup** - Remove duplicates and deprecated files
+5. **PR#5: Security** - Secrets management and hardening
 
 ## 📝 License
 

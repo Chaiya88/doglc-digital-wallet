@@ -1,0 +1,279 @@
+{
+  "name": "merge-doglc-into-logic-workspace",
+  "description": "Project board for merging doglc-digital-wallet and logic-digital-wallet repositories with comprehensive security and organization",
+  "visibility": "public",
+  "template": "board",
+  "columns": [
+    {
+      "name": "Backlog",
+      "description": "Items identified but not yet ready to work on",
+      "preset": "todo"
+    },
+    {
+      "name": "To do", 
+      "description": "Items ready to be worked on, prioritized and scoped",
+      "preset": "todo"
+    },
+    {
+      "name": "In progress",
+      "description": "Items currently being worked on",
+      "preset": "in_progress"
+    },
+    {
+      "name": "Review",
+      "description": "Items completed and under review (PR/code review)",
+      "preset": "in_review"
+    },
+    {
+      "name": "Done",
+      "description": "Completed items",
+      "preset": "done"
+    }
+  ],
+  "automations": [
+    {
+      "trigger": "issue_opened",
+      "action": "move_to_column",
+      "target_column": "Backlog"
+    },
+    {
+      "trigger": "issue_assigned", 
+      "action": "move_to_column",
+      "target_column": "To do"
+    },
+    {
+      "trigger": "pull_request_opened",
+      "action": "move_to_column", 
+      "target_column": "In progress"
+    },
+    {
+      "trigger": "pull_request_review_requested",
+      "action": "move_to_column",
+      "target_column": "Review"
+    },
+    {
+      "trigger": "issue_closed",
+      "action": "move_to_column",
+      "target_column": "Done"
+    },
+    {
+      "trigger": "pull_request_merged",
+      "action": "move_to_column",
+      "target_column": "Done"
+    }
+  ],
+  "initial_cards": [
+    {
+      "title": "📝 Project Overview and Guidelines",
+      "content_type": "note",
+      "content": "See PROJECT_BOARD_README.md for comprehensive project overview, guidelines, and workflow instructions.",
+      "column": "To do",
+      "labels": ["documentation", "guidelines"]
+    },
+    {
+      "title": "🎯 Master Checklist - Merge Repository Benefits",
+      "content_type": "issue_reference",
+      "issue_url": "https://github.com/Chaiya88/logic-digital-wallet/issues/4",
+      "column": "To do",
+      "labels": ["epic", "planning"]
+    },
+    {
+      "title": "🗂️ Source Code Migration",
+      "content_type": "note", 
+      "content": "Move core files from src/ and workers/ directories from both repositories. Consolidate handlers, locales, utils, and main application logic.",
+      "column": "Backlog",
+      "labels": ["file-migration", "source-code"],
+      "priority": "high",
+      "effort": 5
+    },
+    {
+      "title": "⚙️ Production Configuration Integration", 
+      "content_type": "note",
+      "content": "Merge orchestrator/ and production-ready/backup files. Ensure deployment configurations are compatible and functional.",
+      "column": "Backlog", 
+      "labels": ["configuration", "production"],
+      "priority": "high",
+      "effort": 4
+    },
+    {
+      "title": "📋 Wrangler Configuration Consolidation",
+      "content_type": "note",
+      "content": "Combine wrangler.toml files for staging and production environments. Remove duplicate configurations and sanitize sensitive data.",
+      "column": "Backlog",
+      "labels": ["configuration", "wrangler"],
+      "priority": "medium", 
+      "effort": 3
+    },
+    {
+      "title": "📚 Documentation and Scripts Integration",
+      "content_type": "note",
+      "content": "Merge README files, reports, and functional scripts (health-check, deploy, setup). Ensure documentation accuracy.",
+      "column": "Backlog",
+      "labels": ["documentation", "scripts"],
+      "priority": "medium",
+      "effort": 3
+    },
+    {
+      "title": "🔧 Configuration Files Cleanup",
+      "content_type": "note", 
+      "content": "Review and consolidate .gitignore, linter configs, prettier settings, and env.example files.",
+      "column": "Backlog",
+      "labels": ["configuration", "cleanup"],
+      "priority": "low",
+      "effort": 2
+    },
+    {
+      "title": "🔍 Sensitive Data Audit",
+      "content_type": "note",
+      "content": "Scan and remove sensitive data from wrangler.toml files including bank accounts, API keys, emails, webhook URLs.",
+      "column": "To do",
+      "labels": ["security", "audit"],
+      "priority": "high", 
+      "effort": 4
+    },
+    {
+      "title": "🔐 Secrets Migration to Cloudflare",
+      "content_type": "note",
+      "content": "Move all secrets to wrangler secret/Cloudflare Vault. Update configurations to use environment variables.",
+      "column": "To do",
+      "labels": ["security", "secrets"],
+      "priority": "high",
+      "effort": 3
+    },
+    {
+      "title": "🕵️ Git History Security Check", 
+      "content_type": "note",
+      "content": "Audit git history for leaked secrets using git log searches and security scanning tools.",
+      "column": "To do",
+      "labels": ["security", "git-history"],
+      "priority": "high",
+      "effort": 2
+    },
+    {
+      "title": "🔄 Secret Rotation",
+      "content_type": "note",
+      "content": "Rotate and change any previously leaked secrets. Generate new credentials for production use.",
+      "column": "To do", 
+      "labels": ["security", "rotation"],
+      "priority": "high",
+      "effort": 2
+    },
+    {
+      "title": "PR#1: Core Structure",
+      "content_type": "note",
+      "content": "Main files, src, workers, orchestrator - Foundation architecture and primary application logic.",
+      "column": "Backlog",
+      "labels": ["pr-strategy", "core"],
+      "priority": "high",
+      "effort": 5
+    },
+    {
+      "title": "PR#2: Production Config",
+      "content_type": "note", 
+      "content": "wrangler.toml, environment variables, deployment scripts - Production deployment configuration.",
+      "column": "Backlog",
+      "labels": ["pr-strategy", "production"],
+      "priority": "high", 
+      "effort": 4
+    },
+    {
+      "title": "PR#3: Documentation",
+      "content_type": "note",
+      "content": "README updates, examples, environment templates - Comprehensive documentation for new structure.",
+      "column": "Backlog",
+      "labels": ["pr-strategy", "documentation"],
+      "priority": "medium",
+      "effort": 3
+    },
+    {
+      "title": "PR#4: Cleanup", 
+      "content_type": "note",
+      "content": "Remove duplicate/deprecated files, clean up unused configurations and old backup files.",
+      "column": "Backlog",
+      "labels": ["pr-strategy", "cleanup"],
+      "priority": "medium",
+      "effort": 2
+    },
+    {
+      "title": "PR#5: Security Hardening",
+      "content_type": "note",
+      "content": "Sanitize secrets, update .gitignore, implement security policies and monitoring.",
+      "column": "Backlog", 
+      "labels": ["pr-strategy", "security"],
+      "priority": "high",
+      "effort": 4
+    },
+    {
+      "title": "📦 Dependency Resolution",
+      "content_type": "note",
+      "content": "Resolve package.json conflicts for wrangler, telegraf, jose and other dependencies. Ensure version compatibility.",
+      "column": "To do",
+      "labels": ["dependencies", "resolution"],
+      "priority": "medium",
+      "effort": 2
+    },
+    {
+      "title": "⚖️ License Decision", 
+      "content_type": "note",
+      "content": "Decide between MIT vs PRIVATE license for the merged repository. Consider intellectual property implications.",
+      "column": "To do",
+      "labels": ["legal", "license"],
+      "priority": "low",
+      "effort": 1
+    },
+    {
+      "title": "🏗️ CI/CD Pipeline Setup",
+      "content_type": "note",
+      "content": "Implement comprehensive pipeline: lint, build, test, wrangler dry-run, automated deployments.",
+      "column": "Backlog",
+      "labels": ["cicd", "automation"],
+      "priority": "medium", 
+      "effort": 4
+    },
+    {
+      "title": "📖 README Update",
+      "content_type": "note",
+      "content": "Update documentation to reflect new merged structure, architecture, and deployment procedures.",
+      "column": "Backlog",
+      "labels": ["documentation", "readme"],
+      "priority": "medium",
+      "effort": 3
+    },
+    {
+      "title": "🚀 Production Deployment Guide",
+      "content_type": "note", 
+      "content": "Create comprehensive guide for secrets usage and production deployment procedures.",
+      "column": "Backlog",
+      "labels": ["documentation", "deployment"],
+      "priority": "medium",
+      "effort": 3
+    }
+  ],
+  "custom_fields": [
+    {
+      "name": "Priority",
+      "type": "single_select",
+      "options": ["High", "Medium", "Low"]
+    },
+    {
+      "name": "Effort", 
+      "type": "number",
+      "description": "Story points (1-5 scale)"
+    },
+    {
+      "name": "Category",
+      "type": "single_select", 
+      "options": ["File Migration", "Security", "PR Strategy", "System Integration", "Documentation"]
+    },
+    {
+      "name": "Due Date",
+      "type": "date"
+    }
+  ],
+  "settings": {
+    "auto_archive_done_items": true,
+    "archive_after_days": 30,
+    "require_assignee_for_in_progress": true,
+    "enable_notifications": true
+  }
+}

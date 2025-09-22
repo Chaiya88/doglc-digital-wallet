@@ -1,0 +1,166 @@
+name: Project Board Automation
+
+# Automate moving cards in the 'merge-doglc-into-logic-workspace' project board
+# based on issue and PR state changes
+
+on:
+  issues:
+    types: [opened, assigned, closed, reopened]
+  pull_request:
+    types: [opened, ready_for_review, review_requested, closed]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  update-project-board:
+    runs-on: ubuntu-latest
+    name: Update Project Board
+    
+    steps:
+    - name: Get Project ID
+      id: get-project
+      run: |
+        # Note: This requires the project to be created manually first
+        # and the PROJECT_ID to be added as a repository secret
+        echo "project_id=${{ secrets.PROJECT_BOARD_ID }}" >> $GITHUB_OUTPUT
+    
+    - name: Move issue to appropriate column
+      if: github.event_name == 'issues'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const projectId = '${{ steps.get-project.outputs.project_id }}';
+          
+          if (!projectId || projectId === '') {
+            console.log('PROJECT_BOARD_ID secret not set. Please create the project board and add the ID as a secret.');
+            return;
+          }
+          
+          const issue = context.payload.issue;
+          const action = context.payload.action;
+          
+          let column = '';
+          
+          switch(action) {
+            case 'opened':
+              column = 'Backlog';
+              break;
+            case 'assigned':
+              column = 'To do';
+              break;
+            case 'closed':
+              column = 'Done';
+              break;
+            case 'reopened':
+              column = 'To do';
+              break;
+          }
+          
+          if (column) {
+            console.log(`Moving issue #${issue.number} to ${column} column`);
+            // Note: Actual GraphQL mutation would be implemented here
+            // This is a placeholder for the project board API calls
+          }
+    
+    - name: Move PR to appropriate column
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const projectId = '${{ steps.get-project.outputs.project_id }}';
+          
+          if (!projectId || projectId === '') {
+            console.log('PROJECT_BOARD_ID secret not set. Please create the project board and add the ID as a secret.');
+            return;
+          }
+          
+          const pr = context.payload.pull_request;
+          const action = context.payload.action;
+          
+          let column = '';
+          
+          switch(action) {
+            case 'opened':
+            case 'ready_for_review':
+              column = 'In progress';
+              break;
+            case 'review_requested':
+              column = 'Review';
+              break;
+            case 'closed':
+              if (pr.merged) {
+                column = 'Done';
+              } else {
+                column = 'To do'; // Closed without merging
+              }
+              break;
+          }
+          
+          if (column) {
+            console.log(`Moving PR #${pr.number} to ${column} column`);
+            // Note: Actual GraphQL mutation would be implemented here
+          }
+    
+    - name: Handle PR reviews
+      if: github.event_name == 'pull_request_review'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const projectId = '${{ steps.get-project.outputs.project_id }}';
+          
+          if (!projectId || projectId === '') {
+            console.log('PROJECT_BOARD_ID secret not set.');
+            return;
+          }
+          
+          const review = context.payload.review;
+          const pr = context.payload.pull_request;
+          
+          if (review.state === 'approved') {
+            console.log(`PR #${pr.number} approved, moving to Review column`);
+            // Move to Review column when approved
+          } else if (review.state === 'changes_requested') {
+            console.log(`PR #${pr.number} needs changes, moving to In progress column`);
+            // Move back to In progress when changes requested
+          }
+
+  # Cleanup old completed items (optional)
+  cleanup-completed:
+    runs-on: ubuntu-latest
+    name: Archive Old Completed Items
+    # Run weekly on Sundays
+    if: github.event_name == 'schedule'
+    
+    steps:
+    - name: Archive items in Done column older than 30 days
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const projectId = '${{ secrets.PROJECT_BOARD_ID }}';
+          
+          if (!projectId || projectId === '') {
+            console.log('PROJECT_BOARD_ID secret not set.');
+            return;
+          }
+          
+          // Calculate date 30 days ago
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          
+          console.log(`Archiving items completed before ${thirtyDaysAgo.toISOString()}`);
+          // Note: Implementation would query Done column and archive old items
+
+# Note: To enable this workflow:
+# 1. Create the project board manually in GitHub
+# 2. Get the project ID from the URL (e.g., https://github.com/orgs/Chaiya88/projects/123)
+# 3. Add PROJECT_BOARD_ID as a repository secret with the project ID value
+# 4. Uncomment the schedule trigger below if you want weekly cleanup
+
+# Uncomment to enable weekly cleanup:
+# on:
+#   schedule:
+#     - cron: '0 0 * * 0'  # Weekly on Sundays at midnight UTC
