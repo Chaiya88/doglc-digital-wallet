@@ -257,16 +257,9 @@ class DigitalWalletOrchestrator {
   }
 
   async startHealthMonitoring() {
-    // Start continuous health monitoring
-    setInterval(async () => {
-      await this.healthMonitor.checkAllWorkers();
-      await this.metricsCollector.collectMetrics();
-    }, 30000); // Check every 30 seconds
-
-    // Worker auto-recovery
-    setInterval(async () => {
-      await this.healthMonitor.performAutoRecovery();
-    }, 60000); // Auto-recovery check every minute
+    // Health monitoring and metrics collection are now handled by Cron triggers
+    // This method exists for manual initialization if needed
+    console.log('🏗️ Health monitoring initialized - using Cron triggers for scheduled tasks');
   }
 
   async generateDashboard() {
@@ -395,5 +388,33 @@ export default {
   async fetch(request, env, ctx) {
     const orchestrator = new DigitalWalletOrchestrator(env);
     return orchestrator.app.fetch(request, env, ctx);
+  },
+
+  async scheduled(event, env, ctx) {
+    const orchestrator = new DigitalWalletOrchestrator(env);
+    
+    // Handle different scheduled events
+    switch (event.cron) {
+      case '*/1 * * * *': // Every minute - Metrics collection
+        console.log('🔢 Running scheduled metrics collection');
+        await orchestrator.metricsCollector.collectSystemMetrics();
+        await orchestrator.metricsCollector.aggregateMetrics();
+        break;
+        
+      case '*/2 * * * *': // Every 2 minutes - Health checks
+        console.log('🩺 Running scheduled health checks');
+        await orchestrator.healthMonitor.checkAllWorkers();
+        await orchestrator.healthMonitor.performAutoRecovery();
+        break;
+        
+      case '0 * * * *': // Every hour - Cleanup and maintenance
+        console.log('🧹 Running scheduled cleanup');
+        await orchestrator.metricsCollector.cleanupOldMetrics();
+        await orchestrator.healthMonitor.cleanupOldLogs();
+        break;
+        
+      default:
+        console.log(`⚠️ Unknown cron pattern: ${event.cron}`);
+    }
   }
 };

@@ -6,21 +6,36 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "build": "echo 'No build step required for this project'",
     "deploy": "wrangler deploy",
     "deploy:prod": "wrangler deploy --env production",
     "test": "node tests/system.test.js",
     "lint": "eslint src/**/*.js",
-    "format": "prettier --write src/**/*.js"
+    "format": "prettier --write src/**/*.js",
+    "check-env": "node scripts/complete-environment-check.js",
+    "check-env:fix": "node scripts/complete-environment-check.js --fix",
+    "health-check": "node scripts/health-check.js",
+    "setup-cf": "node scripts/setup-cloudflare-resources.js",
+    "cf-auth": "node scripts/cloudflare-setup.js",
+    "cf-setup": "node scripts/cloudflare-interactive-setup.js",
+    "cf-check": "node scripts/cloudflare-setup.js --check-only",
+    "cf-resources": "node scripts/cloudflare-setup.js --resources-only",
+    "deployment-check": "node scripts/deployment-check.js",
+    "quick-fix": "node scripts/quick-fix.js",
+    "dev-server": "node scripts/dev-server.js",
+    "dev-local": "npm run dev-server",
+    "manual-cf": "node scripts/manual-cloudflare-setup.js"
   },
   "dependencies": {
-    "telegraf": "^4.15.0",
-    "@cloudflare/workers-types": "^4.20231121.0"
+    "@cloudflare/workers-types": "^4.20231121.0",
+    "jose": "^6.1.0",
+    "telegraf": "^4.15.0"
   },
   "devDependencies": {
-    "wrangler": "^3.0.0",
+    "dotenv": "^16.3.1",
     "eslint": "^8.50.0",
     "prettier": "^3.0.0",
-    "dotenv": "^16.3.1"
+    "wrangler": "^4.38.0"
   },
   "engines": {
     "node": ">=18.0.0"

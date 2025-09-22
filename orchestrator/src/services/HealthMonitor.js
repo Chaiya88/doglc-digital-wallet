@@ -14,7 +14,7 @@ export class HealthMonitor {
       consecutiveFailures: 3
     };
     this.checkInterval = 30000; // 30 seconds
-    this.startMonitoring();
+    this.lastHealthCheck = Date.now();
   }
 
   async startMonitoring() {
@@ -23,10 +23,9 @@ export class HealthMonitor {
     // Initial health check
     await this.checkAllWorkers();
     
-    // Periodic health checks
-    setInterval(async () => {
-      await this.checkAllWorkers();
-    }, this.checkInterval);
+    // Note: Periodic health checks will be handled by Cron triggers
+    // instead of setInterval in Cloudflare Workers environment
+    console.log('🏥 Health monitor initialized. Use Cron triggers for periodic checks.');
   }
 
   async checkAllWorkers() {
@@ -415,5 +414,35 @@ export class HealthMonitor {
       healthPercentage: total > 0 ? Math.round((healthy / total) * 100) : 0,
       lastCheck: new Date().toISOString()
     };
+  }
+
+  // Cron-triggered method for cleanup
+  async cleanupOldLogs() {
+    const cutoff = Date.now() - (24 * 60 * 60 * 1000); // 24 hours
+    console.log(`🧹 Cleaning up health logs older than ${new Date(cutoff).toISOString()}`);
+    
+    try {
+      // Clean up health history
+      for (const [workerId, history] of this.healthHistory.entries()) {
+        const filtered = history.filter(record => record.timestamp > cutoff);
+        this.healthHistory.set(workerId, filtered);
+        
+        if (history.length !== filtered.length) {
+          console.log(`🧹 Cleaned up ${history.length - filtered.length} old health records for ${workerId}`);
+        }
+      }
+      
+      // Clean up old health checks
+      for (const [workerId, check] of this.healthChecks.entries()) {
+        if (check.timestamp < cutoff) {
+          this.healthChecks.delete(workerId);
+          console.log(`🧹 Removed stale health check for ${workerId}`);
+        }
+      }
+      
+      console.log('🧹 Health logs cleanup completed');
+    } catch (error) {
+      console.error('Failed to cleanup old health logs:', error);
+    }
   }
 }

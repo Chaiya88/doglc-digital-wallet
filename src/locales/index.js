@@ -44,8 +44,8 @@ const LANGUAGE_MESSAGES = {
  * @param {string} languageCode - Language code (th, en, zh, km, ko, id)
  * @returns {object} Messages object
  */
-export function getMessages(languageCode = 'th') {
-  return LANGUAGE_MESSAGES[languageCode] || LANGUAGE_MESSAGES.th;
+export function getMessages(languageCode = 'en') {
+  return LANGUAGE_MESSAGES[languageCode] || LANGUAGE_MESSAGES.en;
 }
 
 /**
@@ -61,31 +61,13 @@ export function getLanguageDisplay(languageCode) {
 
 /**
  * Detect user language from Telegram locale
+ * Always defaults to English until user manually changes language
  * @param {object} user - Telegram user object
  * @returns {string} Detected language code
  */
 export function detectUserLanguage(user) {
-  if (!user || !user.language_code) {
-    return 'th'; // Default to Thai
-  }
-
-  const locale = user.language_code.toLowerCase();
-  
-  // Map common locales to our supported languages
-  const localeMap = {
-    'th': 'th',
-    'en': 'en',
-    'zh': 'zh',
-    'zh-cn': 'zh',
-    'zh-tw': 'zh',
-    'km': 'km',
-    'ko': 'ko',
-    'kr': 'ko',
-    'id': 'id',
-    'in': 'id'
-  };
-
-  return localeMap[locale] || 'th'; // Default to Thai
+  // Always return English as default until user manually changes
+  return 'en';
 }
 
 /**

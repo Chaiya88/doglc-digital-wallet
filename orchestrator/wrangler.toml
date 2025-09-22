@@ -3,53 +3,13 @@ main = "src/index.js"
 compatibility_date = "2024-01-15"
 compatibility_flags = ["nodejs_compat"]
 
-[env.staging]
-name = "doglc-digital-wallet-orchestrator-staging"
-vars = { ENVIRONMENT = "staging" }
-
-[env.production]
-name = "doglc-digital-wallet-orchestrator-production"
-vars = { 
-  ENVIRONMENT = "production",
-  ACCOUNT_ID = "85bcd386f06541844632ecb984afa9fb",
-  PROJECT_NAME = "digital-wallet-platform",
-  DOMAIN = "teenoi96.org",
-  FRONTEND_VERSION = "3.0-enhanced",
-  SUPPORTED_LANGUAGES = "th,en,zh,km",
-  DEFAULT_LANGUAGE = "th",
-  REAL_TIME_UPDATES = "true",
-  OCR_ENABLED = "true",
-  API_RATE_LIMIT_PER_MINUTE = "100"
-}
-
-# Environment Variables (set via wrangler secret put)
-# ORCHESTRATOR_API_KEY - Authentication key for admin endpoints
-# SLACK_WEBHOOK_URL - Optional Slack webhook for alerts
-# DISCORD_WEBHOOK_URL - Optional Discord webhook for alerts
-
-# KV Namespace for rate limiting and caching
+# KV Namespaces
 [[kv_namespaces]]
 binding = "ORCHESTRATOR_KV"
 id = "4582f3e06c6a42f6b48afdffde6c750d"
 preview_id = "4582f3e06c6a42f6b48afdffde6c750d"
 
-# Additional KV namespaces from production config
-[[kv_namespaces]]
-binding = "DOGLC_LOGS"
-id = "b3f14c9db2bd4c1a9f075561afb8deca"
-preview_id = "b3f14c9db2bd4c1a9f075561afb8deca"
-
-[[kv_namespaces]]
-binding = "CONFIG_KV"
-id = "31f813fdf51743a0a96a7dc22b45f22c"
-preview_id = "31f813fdf51743a0a96a7dc22b45f22c"
-
-[[kv_namespaces]]
-binding = "ALERT_STATE"
-id = "08b31e461ec448218004e4ed0b37d69d"
-preview_id = "08b31e461ec448218004e4ed0b37d69d"
-
-# D1 Databases from production config
+# D1 Databases
 [[d1_databases]]
 binding = "MAIN_WALLET_DB"
 database_name = "doglc-wallet-main"
@@ -60,12 +20,7 @@ binding = "BANKING_SYSTEM_DB"
 database_name = "doglc-banking-system"
 database_id = "abb80d11-b1c1-499b-88d3-3df2ebbb5525"
 
-# Durable Objects for stateful services (future enhancement)
-# [[durable_objects.bindings]]
-# name = "WORKER_MANAGER"
-# class_name = "WorkerManager"
-
-# Service bindings to other workers
+# Service bindings
 [[services]]
 binding = "MAIN_BOT_SERVICE"
 service = "doglc-digital-wallet-main-bot"
@@ -90,29 +45,106 @@ service = "doglc-digital-wallet-frontend"
 binding = "ANALYTICS_SERVICE"
 service = "doglc-digital-wallet-analytics"
 
-# Staging environment service bindings
-[env.staging.services]
-MAIN_BOT_SERVICE = { service = "doglc-digital-wallet-main-bot-staging" }
-API_SERVICE = { service = "doglc-digital-wallet-api-staging" }
-BANKING_SERVICE = { service = "doglc-digital-wallet-banking-staging" }
-SECURITY_SERVICE = { service = "doglc-digital-wallet-security-staging" }
-FRONTEND_SERVICE = { service = "doglc-digital-wallet-frontend-staging" }
-ANALYTICS_SERVICE = { service = "doglc-digital-wallet-analytics-staging" }
+# Staging environment
+[env.staging]
+name = "doglc-digital-wallet-orchestrator-staging"
 
-# Production environment service bindings
-[env.production.services]
-MAIN_BOT_SERVICE = { service = "doglc-digital-wallet-main-bot-production" }
-API_SERVICE = { service = "doglc-digital-wallet-api-production" }
-BANKING_SERVICE = { service = "doglc-digital-wallet-banking-production" }
-SECURITY_SERVICE = { service = "doglc-digital-wallet-security-production" }
-FRONTEND_SERVICE = { service = "doglc-digital-wallet-frontend-production" }
-ANALYTICS_SERVICE = { service = "doglc-digital-wallet-analytics-production" }
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+# Staging service bindings
+[[env.staging.services]]
+binding = "MAIN_BOT_SERVICE"
+service = "doglc-digital-wallet-main-bot-staging"
+
+[[env.staging.services]]
+binding = "API_SERVICE"
+service = "doglc-digital-wallet-api-staging"
+
+[[env.staging.services]]
+binding = "BANKING_SERVICE"
+service = "doglc-digital-wallet-banking-staging"
+
+[[env.staging.services]]
+binding = "SECURITY_SERVICE"
+service = "doglc-digital-wallet-security-staging"
+
+[[env.staging.services]]
+binding = "FRONTEND_SERVICE"
+service = "doglc-digital-wallet-frontend-staging"
+
+[[env.staging.services]]
+binding = "ANALYTICS_SERVICE"
+service = "doglc-digital-wallet-analytics-staging"
+
+# Production environment
+[env.production]
+name = "doglc-digital-wallet-orchestrator-production"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+ACCOUNT_ID = "85bcd386f06541844632ecb984afa9fb"
+PROJECT_NAME = "digital-wallet-platform"
+DOMAIN = "teenoi96.org"
+FRONTEND_VERSION = "3.0-enhanced"
+SUPPORTED_LANGUAGES = "th,en,zh,km"
+DEFAULT_LANGUAGE = "th"
+REAL_TIME_UPDATES = "true"
+OCR_ENABLED = "true"
+API_RATE_LIMIT_PER_MINUTE = "100"
+
+# Production KV Namespaces
+[[env.production.kv_namespaces]]
+binding = "ORCHESTRATOR_KV"
+id = "4582f3e06c6a42f6b48afdffde6c750d"
+preview_id = "4582f3e06c6a42f6b48afdffde6c750d"
+
+[[env.production.kv_namespaces]]
+binding = "DOGLC_LOGS"
+id = "b3f14c9db2bd4c1a9f075561afb8deca"
+preview_id = "b3f14c9db2bd4c1a9f075561afb8deca"
+
+[[env.production.kv_namespaces]]
+binding = "CONFIG_KV"
+id = "31f813fdf51743a0a96a7dc22b45f22c"
+preview_id = "31f813fdf51743a0a96a7dc22b45f22c"
+
+[[env.production.kv_namespaces]]
+binding = "ALERT_STATE"
+id = "08b31e461ec448218004e4ed0b37d69d"
+preview_id = "08b31e461ec448218004e4ed0b37d69d"
+
+# Production D1 Databases
+[[env.production.d1_databases]]
+binding = "MAIN_WALLET_DB"
+database_name = "doglc-wallet-main"
+database_id = "49747ab5-7e7f-4c70-abf3-84f099354cf7"
+
+[[env.production.d1_databases]]
+binding = "BANKING_SYSTEM_DB"
+database_name = "doglc-banking-system"
+database_id = "abb80d11-b1c1-499b-88d3-3df2ebbb5525"
+
+# Production service bindings (only include deployed workers)
+[[env.production.services]]
+binding = "MAIN_BOT_SERVICE"
+service = "doglc-digital-wallet-production"
+
+# Cron triggers for background tasks (configure after successful deployment)
+# [[env.production.triggers.crons]]
+# cron = "*/1 * * * *"
+
+# [[env.production.triggers.crons]]
+# cron = "*/2 * * * *"
+
+# [[env.production.triggers.crons]]
+# cron = "0 * * * *"
 
 # Worker configuration
 [limits]
-cpu_ms = 50000  # 50 seconds CPU time limit
+cpu_ms = 50000
 
-# Custom domains (configure after deployment)
-# [route]
-# pattern = "orchestrator.doglc-wallet.com/*"
-# zone_name = "doglc-wallet.com"
+# Environment Variables (set via wrangler secret put)
+# ORCHESTRATOR_API_KEY - Authentication key for admin endpoints
+# SLACK_WEBHOOK_URL - Optional Slack webhook for alerts
+# DISCORD_WEBHOOK_URL - Optional Discord webhook for alerts

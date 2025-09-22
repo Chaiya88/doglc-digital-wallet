@@ -12,212 +12,295 @@ vars = { ENVIRONMENT = "staging", DEBUG_MODE = "true", LOG_LEVEL = "debug" }
 name = "doglc-digital-wallet-production" 
 vars = { ENVIRONMENT = "production", DEBUG_MODE = "false", LOG_LEVEL = "info" }
 
+# Production KV Namespaces
+[[env.production.kv_namespaces]]
+binding = "CONFIG_KV"
+id = "31f813fdf51743a0a96a7dc22b45f22c"
+preview_id = "your-preview-config-kv-id"
+
+[[env.production.kv_namespaces]]
+binding = "RATE_KV"
+id = "0a3ec022e9b14774ba5791e5d5f0f6b7"
+preview_id = "your-preview-rate-kv-id"
+
+[[env.production.kv_namespaces]]
+binding = "USER_SESSIONS"
+id = "cfe9a09ceea142728bb949be6a165296"
+preview_id = "your-preview-user-sessions-id"
+
+[[env.production.kv_namespaces]]
+binding = "MARKET_DATA_CACHE"
+id = "b3df3a37e1f647c4a62d68655e452cce"
+preview_id = "your-preview-market-data-cache-id"
+
+[[env.production.kv_namespaces]]
+binding = "SLIP_IMAGES"
+id = "d3148c4f344249f19f32682fb5f6a8ca"
+preview_id = "your-preview-slip-images-id"
+
+[[env.production.kv_namespaces]]
+binding = "AUDIT_LOG_KV"
+id = "e31d487a80b442aaba15444c7982b6a0"
+preview_id = "your-preview-audit-log-kv-id"
+
+[[env.production.kv_namespaces]]
+binding = "USER_ACTIVITY_KV"
+id = "4582f3e06c6a42f6b48afdffde6c750d"
+preview_id = "user-activity-store-preview-id"
+
+[[env.production.kv_namespaces]]
+binding = "PERFORMANCE_KV"
+id = "4d36a18049f044ff80e595b962a74b31"
+preview_id = "performance-metrics-store-preview-id"
+
+[[env.production.kv_namespaces]]
+binding = "OCR_LOG_KV"
+id = "bed0205ccfd94275b5f21ed18d2a9920"
+preview_id = "ocr-processing-log-store-preview-id"
+
+[[env.production.kv_namespaces]]
+binding = "GMAIL_LOG_KV"
+id = "9571bdf53290445f9e480aeababb6b08"
+preview_id = "gmail-webhook-log-store-preview-id"
+
+[[env.production.kv_namespaces]]
+binding = "DEPOSIT_REQUESTS_KV"
+id = "74657733c0004630b1f8a00019531d75"
+preview_id = "deposit-requests-store-preview-id"
+
+[[env.production.kv_namespaces]]
+binding = "CONFIRMED_DEPOSITS_KV"
+id = "7f4a4b7fb36144a38813002cc43c3913"
+preview_id = "confirmed-deposits-store-preview-id"
+
+[[env.production.kv_namespaces]]
+binding = "SECURITY_EVENTS_KV"
+id = "edf24ceaf0a84eeca9f3314ff88b70ad"
+preview_id = "security-events-store-preview-id"
+
+# Production D1 Databases
+[[env.production.d1_databases]]
+binding = "WALLET_DB"
+database_name = "doglc-wallet-db"
+database_id = "c5d8abef-1763-4c6a-afb4-00a77a8e412c"
+
+[[env.production.d1_databases]]
+binding = "ANALYTICS_DB"
+database_name = "doglc-analytics-db"
+database_id = "e4e62d0b-06d3-4033-9550-107632bbd3b7"
+
+[[env.production.d1_databases]]
+binding = "DOGLC_DB"
+database_name = "doglc-main-db"
+database_id = "73765794-dbf9-4561-82d2-b4f2d2912947"
+
 # Enhanced KV Namespaces for comprehensive functionality
 [[kv_namespaces]]
 binding = "CONFIG_KV"
-id = "your-config-kv-namespace-id"
+id = "31f813fdf51743a0a96a7dc22b45f22c"
 preview_id = "your-preview-config-kv-id"
 
 [[kv_namespaces]]
 binding = "RATE_KV"
-id = "your-rate-kv-namespace-id"
+id = "0a3ec022e9b14774ba5791e5d5f0f6b7"
 preview_id = "your-preview-rate-kv-id"
 
 [[kv_namespaces]]
 binding = "USER_SESSIONS"
-id = "your-user-sessions-namespace-id"
+id = "cfe9a09ceea142728bb949be6a165296"
 preview_id = "your-preview-user-sessions-id"
 
 [[kv_namespaces]]
 binding = "MARKET_DATA_CACHE"
-id = "your-market-data-cache-namespace-id"
+id = "b3df3a37e1f647c4a62d68655e452cce"
 preview_id = "your-preview-market-data-cache-id"
 
 [[kv_namespaces]]
 binding = "SLIP_IMAGES"
-id = "your-slip-images-namespace-id"
+id = "d3148c4f344249f19f32682fb5f6a8ca"
 preview_id = "your-preview-slip-images-id"
 
 [[kv_namespaces]]
 binding = "AUDIT_LOG_KV"
-id = "your-audit-log-kv-namespace-id"
+id = "e31d487a80b442aaba15444c7982b6a0"
 preview_id = "your-preview-audit-log-kv-id"
 
 # Enhanced KV for advanced features
 [[kv_namespaces]]
 binding = "USER_ACTIVITY_KV"
-id = "user-activity-store-id"
+id = "4582f3e06c6a42f6b48afdffde6c750d"
 preview_id = "user-activity-store-preview-id"
 
 [[kv_namespaces]]
 binding = "PERFORMANCE_KV"
-id = "performance-metrics-store-id"
+id = "4d36a18049f044ff80e595b962a74b31"
 preview_id = "performance-metrics-store-preview-id"
 
 [[kv_namespaces]]
 binding = "OCR_LOG_KV"
-id = "ocr-processing-log-store-id"
+id = "bed0205ccfd94275b5f21ed18d2a9920"
 preview_id = "ocr-processing-log-store-preview-id"
 
 [[kv_namespaces]]
 binding = "GMAIL_LOG_KV"
-id = "gmail-webhook-log-store-id"
+id = "9571bdf53290445f9e480aeababb6b08"
 preview_id = "gmail-webhook-log-store-preview-id"
 
 [[kv_namespaces]]
 binding = "DEPOSIT_REQUESTS_KV"
-id = "deposit-requests-store-id"
+id = "74657733c0004630b1f8a00019531d75"
 preview_id = "deposit-requests-store-preview-id"
 
 [[kv_namespaces]]
 binding = "CONFIRMED_DEPOSITS_KV"
-id = "confirmed-deposits-store-id"
+id = "7f4a4b7fb36144a38813002cc43c3913"
 preview_id = "confirmed-deposits-store-preview-id"
 
 [[kv_namespaces]]
 binding = "SECURITY_EVENTS_KV"
-id = "security-events-store-id"
+id = "edf24ceaf0a84eeca9f3314ff88b70ad"
 preview_id = "security-events-store-preview-id"
 
 # Enhanced D1 databases for comprehensive data management
 [[d1_databases]]
 binding = "WALLET_DB"
 database_name = "doglc-wallet-db"
-database_id = "your-d1-database-id"
+database_id = "c5d8abef-1763-4c6a-afb4-00a77a8e412c"
 
 [[d1_databases]]
 binding = "ANALYTICS_DB"
 database_name = "doglc-analytics-db"
-database_id = "your-analytics-db-id"
+database_id = "e4e62d0b-06d3-4033-9550-107632bbd3b7"
 
 [[d1_databases]]
 binding = "DOGLC_DB"
 database_name = "doglc-main-db"
-database_id = "doglc-main-database-id"
+database_id = "73765794-dbf9-4561-82d2-b4f2d2912947"
 
 # Enhanced R2 buckets for file storage and backups
 [[r2_buckets]]
 binding = "WALLET_BUCKET"
-bucket_name = "doglc-wallet-files"
+bucket_name = "doglc-wallet-bucket"
 
 [[r2_buckets]]
 binding = "BACKUP_BUCKET"
-bucket_name = "doglc-wallet-backups"
+bucket_name = "doglc-backup-bucket"
 
 [[r2_buckets]]
 binding = "SLIP_IMAGES_R2"
 bucket_name = "doglc-slip-images"
-preview_bucket_name = "doglc-slip-images-preview"
 
 [[r2_buckets]]
-binding = "DOCUMENTS_R2"
-bucket_name = "doglc-documents"
-preview_bucket_name = "doglc-documents-preview"
+binding = "IMAGES_R2"
+bucket_name = "doglc-images"
 
-# Enhanced Durable Objects for real-time features and state management
-[[durable_objects.bindings]]
-name = "WALLET_DO"
-class_name = "WalletDurableObject"
+[[r2_buckets]]
+binding = "RECEIPTS_R2"
+bucket_name = "doglc-receipts"
 
-[[durable_objects.bindings]]
-name = "RATE_LIMITER"
-class_name = "RateLimiterDurableObject"
+[[r2_buckets]]
+binding = "REPORTS_R2"
+bucket_name = "doglc-reports"
 
-[[durable_objects.bindings]]
-name = "USER_SESSION_MANAGER"
-class_name = "UserSessionManager"
+# Documents bucket - create later
+# [[r2_buckets]]
+# binding = "DOCUMENTS_R2"
+# bucket_name = "doglc-documents"
 
-# Enhanced Service bindings for multi-worker architecture
+# Durable Objects for real-time features and state management (coming soon)
+# [[durable_objects.bindings]]
+# name = "WALLET_DO"
+# class_name = "WalletDurableObject"
+
+# [[durable_objects.bindings]]
+# name = "RATE_LIMITER"
+# class_name = "RateLimiterDurableObject"
+
+# [[durable_objects.bindings]]
+# name = "USER_SESSION_MANAGER"
+# class_name = "UserSessionManager"
+
+# Enhanced Service bindings for multi-worker architecture (staging environment)
 [[services]]
 binding = "BANKING_WORKER"
-service = "doglc-banking-worker"
+service = "doglc-banking-worker-staging"
 
 [[services]]
 binding = "SECURITY_WORKER"
-service = "doglc-security-worker"
+service = "doglc-security-worker-staging"
 
 [[services]]
 binding = "FRONTEND_WORKER"
-service = "doglc-frontend-worker"
+service = "doglc-frontend-worker-staging"
 
 [[services]]
 binding = "ANALYTICS_WORKER"
-service = "doglc-analytics-worker"
+service = "doglc-analytics-worker-staging"
 
 [[services]]
-binding = "OCR_WORKER"
-service = "doglc-ocr-worker"
+binding = "API_WORKER"
+service = "doglc-api-worker-staging"
 
-# Queue bindings for background processing
-[[queues.producers]]
-binding = "DEPOSIT_QUEUE"
-queue = "deposit-processing-queue"
+# Queue bindings for background processing (coming soon)
+# [[queues.producers]]
+# binding = "DEPOSIT_QUEUE"
+# queue = "deposit-processing-queue"
 
-[[queues.producers]]
-binding = "WITHDRAWAL_QUEUE"
-queue = "withdrawal-processing-queue"
+# [[queues.producers]]
+# binding = "WITHDRAWAL_QUEUE"
+# queue = "withdrawal-processing-queue"
 
-[[queues.producers]]
-binding = "NOTIFICATION_QUEUE"
-queue = "notification-queue"
+# [[queues.producers]]
+# binding = "NOTIFICATION_QUEUE"
+# queue = "notification-queue"
 
-[[queues.producers]]
-binding = "OCR_QUEUE"
-queue = "ocr-processing-queue"
+# [[queues.producers]]
+# binding = "OCR_QUEUE"
+# queue = "ocr-processing-queue"
 
-[[queues.producers]]
-binding = "GMAIL_QUEUE"
-queue = "gmail-webhook-queue"
+# [[queues.producers]]
+# binding = "GMAIL_QUEUE"
+# queue = "gmail-webhook-queue"
 
-# Vectorize for AI/ML features
-[[vectorize]]
-binding = "FRAUD_DETECTION_AI"
-index_name = "fraud-detection-vectors"
+# Vectorize for AI/ML features (coming soon)
+# [[vectorize]]
+# binding = "FRAUD_DETECTION_AI"
+# index_name = "fraud-detection-vectors"
 
-[[vectorize]]
-binding = "OCR_AI_VECTORS"
-index_name = "ocr-pattern-vectors"
+# [[vectorize]]
+# binding = "OCR_AI_VECTORS"
+# index_name = "ocr-pattern-vectors"
 
-# Analytics Engine for comprehensive data analysis
-[[analytics_engine_datasets]]
-binding = "TRANSACTION_ANALYTICS"
-dataset = "transaction_data"
+# Analytics Engine for comprehensive data analysis (coming soon)
+# [[analytics_engine_datasets]]
+# binding = "TRANSACTION_ANALYTICS"
+# dataset = "transaction_data"
 
-[[analytics_engine_datasets]]
-binding = "USER_BEHAVIOR_ANALYTICS"
-dataset = "user_behavior_data"
+# [[analytics_engine_datasets]]
+# binding = "USER_BEHAVIOR_ANALYTICS"
+# dataset = "user_behavior_data"
 
-[[analytics_engine_datasets]]
-binding = "SECURITY_ANALYTICS"
-dataset = "security_events_data"
+# [[analytics_engine_datasets]]
+# binding = "SECURITY_ANALYTICS"
+# dataset = "security_events_data"
 
-# Browser rendering for receipt generation and OCR processing
-[browser]
-binding = "BROWSER"
+# Email configuration for notifications (coming soon)
+# [email]
+# binding = "EMAIL"
+# destination_address = "support@doglc.digital"
 
-# Email configuration for notifications
-[email]
-binding = "EMAIL"
-destination_address = "support@doglc.digital"
+# Hyperdrive for database acceleration (coming soon)
+# [[hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "your-hyperdrive-config-id"
 
-# Hyperdrive for database acceleration (optional)
-[[hyperdrive]]
-binding = "HYPERDRIVE"
-id = "your-hyperdrive-config-id"
-
-# AI binding for enhanced fraud detection
-[ai]
-binding = "AI"
+# AI binding for enhanced fraud detection (coming soon)
+# [ai]
+# binding = "AI"
 
 # Placement configuration for optimal performance
 [placement]
 mode = "smart"
-
-# Build configuration
-[build]
-command = "npm run build"
-cwd = "."
-watch_dir = ["src"]
 
 # Node.js compatibility for crypto and other modules
 node_compat = true
@@ -227,23 +310,13 @@ node_compat = true
 cpu_ms = 30000  # 30 seconds max execution time
 
 # Asset configuration for static files
-# Durable Objects migrations
-[[migrations]]
-tag = "v1"
-new_classes = ["WalletDurableObject", "RateLimiterDurableObject", "UserSessionManager"]
+# [[migrations]]
+# tag = "v1"
+# new_classes = ["WalletDurableObject", "RateLimiterDurableObject", "UserSessionManager"]
 
 [assets]
 directory = "./public"
 binding = "ASSETS"
-
-# Tail configuration for enhanced debugging
-[tail]
-filters = [
-  { outcome = "exception" },
-  { outcome = "ok", level = "error" },
-  { outcome = "cancelled" },
-  { sampling_rate = 0.1 }
-]
 
 # Observability configuration
 [observability]

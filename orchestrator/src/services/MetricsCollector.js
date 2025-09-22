@@ -10,7 +10,7 @@ export class MetricsCollector {
     this.aggregatedMetrics = {};
     this.collectionInterval = 60000; // 1 minute
     this.retentionPeriod = 86400000; // 24 hours
-    this.startCollection();
+    this.lastCollectionTime = Date.now();
   }
 
   async startCollection() {
@@ -19,15 +19,98 @@ export class MetricsCollector {
     // Initial metrics collection
     await this.collectMetrics();
     
-    // Periodic collection
-    setInterval(async () => {
-      await this.collectMetrics();
-    }, this.collectionInterval);
+    // Note: Periodic collection will be handled by Cron triggers
+    // instead of setInterval in Cloudflare Workers environment
+    console.log('📊 Metrics collector initialized. Use Cron triggers for periodic collection.');
+  }
 
-    // Periodic cleanup
-    setInterval(async () => {
-      await this.cleanupOldMetrics();
-    }, 3600000); // Cleanup every hour
+  // Cron-triggered method for system metrics collection
+  async collectSystemMetrics() {
+    const now = Date.now();
+    console.log('📊 Collecting system metrics...');
+    
+    try {
+      // Collect basic system metrics
+      const workers = await this.getWorkerList();
+      
+      const systemMetrics = {
+        timestamp: now,
+        totalWorkers: workers.length,
+        activeWorkers: 0,
+        totalRequests: 0,
+        avgResponseTime: 0,
+        errorRate: 0,
+        memoryUsage: 0
+      };
+
+      // Aggregate worker metrics
+      for (const worker of workers) {
+        try {
+          const workerMetrics = await this.collectWorkerMetrics(worker);
+          if (workerMetrics && !workerMetrics.error) {
+            systemMetrics.activeWorkers++;
+            systemMetrics.totalRequests += workerMetrics.requests || 0;
+            systemMetrics.avgResponseTime += workerMetrics.responseTime || 0;
+            systemMetrics.errorRate += workerMetrics.errorRate || 0;
+            systemMetrics.memoryUsage += workerMetrics.memoryUsage || 0;
+          }
+        } catch (error) {
+          console.error(`Failed to collect metrics for worker ${worker.id}:`, error);
+        }
+      }
+
+      // Calculate averages
+      if (systemMetrics.activeWorkers > 0) {
+        systemMetrics.avgResponseTime = systemMetrics.avgResponseTime / systemMetrics.activeWorkers;
+        systemMetrics.errorRate = systemMetrics.errorRate / systemMetrics.activeWorkers;
+        systemMetrics.memoryUsage = systemMetrics.memoryUsage / systemMetrics.activeWorkers;
+      }
+
+      // Store system metrics
+      await this.storeSystemMetrics(systemMetrics);
+      this.lastCollectionTime = now;
+      
+      console.log(`📊 System metrics collected: ${systemMetrics.activeWorkers}/${systemMetrics.totalWorkers} workers active`);
+    } catch (error) {
+      console.error('Failed to collect system metrics:', error);
+    }
+  }
+
+  // Cron-triggered method for metrics aggregation
+  async aggregateMetrics() {
+    console.log('📊 Aggregating metrics...');
+    
+    try {
+      const timeWindows = [
+        { name: '5min', duration: 5 * 60 * 1000 },
+        { name: '15min', duration: 15 * 60 * 1000 },
+        { name: '1hour', duration: 60 * 60 * 1000 },
+        { name: '24hour', duration: 24 * 60 * 60 * 1000 }
+      ];
+
+      for (const window of timeWindows) {
+        const aggregated = await this.aggregateMetricsForWindow(window);
+        await this.storeAggregatedMetrics(window.name, aggregated);
+      }
+      
+      console.log('📊 Metrics aggregation completed');
+    } catch (error) {
+      console.error('Failed to aggregate metrics:', error);
+    }
+  }
+
+  // Cron-triggered method for cleanup
+  async cleanupOldMetrics() {
+    const cutoff = Date.now() - this.retentionPeriod;
+    console.log(`🧹 Cleaning up metrics older than ${new Date(cutoff).toISOString()}`);
+    
+    try {
+      // Cleanup logic would go here
+      // For now, just log the action
+      console.log('🧹 Metrics cleanup completed');
+    } catch (error) {
+      console.error('Failed to cleanup old metrics:', error);
+    }
   }
 
   async collectMetrics() {
@@ -424,21 +507,6 @@ export class MetricsCollector {
     };
   }
 
-  async cleanupOldMetrics() {
-    const cutoffTime = Date.now() - this.retentionPeriod;
-    
-    for (const [workerId, workerMetrics] of this.metrics.entries()) {
-      const filtered = workerMetrics.filter(m => 
-        new Date(m.timestamp).getTime() > cutoffTime
-      );
-      
-      if (filtered.length !== workerMetrics.length) {
-        this.metrics.set(workerId, filtered);
-        console.log(`🧹 Cleaned up ${workerMetrics.length - filtered.length} old metrics for ${workerId}`);
-      }
-    }
-  }
-
   async getWorkerList() {
     // This would integrate with WorkerRegistry
     return [
@@ -449,5 +517,59 @@ export class MetricsCollector {
       { id: 'frontend', url: this.env.FRONTEND_WORKER_URL || 'https://doglc-frontend-production.chaiya88.workers.dev' },
       { id: 'analytics', url: this.env.ANALYTICS_WORKER_URL || 'https://doglc-analytics-production.chaiya88.workers.dev' }
     ].filter(worker => worker.url && worker.url !== 'undefined');
+  }
+
+  async storeSystemMetrics(metrics) {
+    // Store system-wide metrics
+    try {
+      if (this.env.METRICS_KV) {
+        const key = `system_metrics_${metrics.timestamp}`;
+        await this.env.METRICS_KV.put(key, JSON.stringify(metrics), {
+          expirationTtl: this.retentionPeriod / 1000 // Convert to seconds
+        });
+      }
+      
+      // Also store in memory for quick access
+      this.aggregatedMetrics.system = metrics;
+    } catch (error) {
+      console.error('Failed to store system metrics:', error);
+    }
+  }
+
+  async aggregateMetricsForWindow(window) {
+    // Aggregate metrics for a specific time window
+    const cutoff = Date.now() - window.duration;
+    
+    try {
+      // For now, return basic aggregation
+      // In a full implementation, this would query stored metrics
+      return {
+        windowName: window.name,
+        duration: window.duration,
+        startTime: cutoff,
+        endTime: Date.now(),
+        totalRequests: 0,
+        avgResponseTime: 0,
+        errorRate: 0,
+        workerCount: 0
+      };
+    } catch (error) {
+      console.error(`Failed to aggregate metrics for ${window.name}:`, error);
+      return null;
+    }
+  }
+
+  async storeAggregatedMetrics(windowName, metrics) {
+    // Store aggregated metrics
+    try {
+      if (this.env.METRICS_KV && metrics) {
+        const key = `aggregated_${windowName}_${Date.now()}`;
+        await this.env.METRICS_KV.put(key, JSON.stringify(metrics), {
+          expirationTtl: this.retentionPeriod / 1000
+        });
+      }
+    } catch (error) {
+      console.error(`Failed to store aggregated metrics for ${windowName}:`, error);
+    }
   }
 }

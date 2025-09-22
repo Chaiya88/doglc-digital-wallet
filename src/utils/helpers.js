@@ -168,29 +168,6 @@ export function hashUserId(userId) {
 }
 
 /**
- * Sanitize user input to prevent injection attacks
- */
-export function sanitizeInput(input) {
-  if (typeof input !== 'string') return input;
-  
-  // Remove potentially dangerous characters
-  return input
-    .replace(/[<>\"'&]/g, '') // Remove HTML/script characters
-    .replace(/javascript:/gi, '') // Remove javascript protocol
-    .replace(/data:/gi, '') // Remove data protocol
-    .trim()
-    .substring(0, 1000); // Limit length
-}
-
-/**
- * Validate Thai phone number
- */
-export function validateThaiPhone(phone) {
-  const phoneRegex = /^(\+66|66|0)(2|3|6|7|8|9)\d{8}$/;
-  return phoneRegex.test(phone.replace(/[\s-]/g, ''));
-}
-
-/**
  * Validate cryptocurrency address
  */
 export function validateCryptoAddress(address, type = 'USDT') {

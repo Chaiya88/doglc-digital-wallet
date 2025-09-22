@@ -1,5 +1,5 @@
 /**
- * Start command handler with multi-language support
+ * Start command handler with English-first design
  */
 
 import { createLanguageKeyboard } from '../locales/index.js';
@@ -7,34 +7,33 @@ import { createLanguageKeyboard } from '../locales/index.js';
 export async function handleStart(ctx) {
   try {
     const messages = ctx.messages; // Set by middleware
+    const username = ctx.from?.username || ctx.from?.first_name || 'user';
     
-    const welcomeMessage = `
-${messages.welcome}
-
-${messages.securityWarning}
-    `;
+    const welcomeMessage = messages.welcome.replace(/{username}/g, username);
     
-    // Create inline keyboard for quick actions
+    // Clean 8-button layout without undefined
     const keyboard = {
       inline_keyboard: [
         [
-          { text: '💳 ' + messages.walletInfo, callback_data: 'wallet' },
-          { text: '💰 ' + messages.currentBalance.replace('{amount}', ''), callback_data: 'balance' }
+          { text: '💰 Balance', callback_data: 'balance' },
+          { text: '💳 Deposit', callback_data: 'deposit' }
         ],
         [
-          { text: '📤 ' + messages.sendMoney, callback_data: 'send' },
-          { text: '📥 ' + messages.receiveMoney, callback_data: 'receive' }
+          { text: '📤 Withdraw', callback_data: 'withdraw' },
+          { text: '📊 Send Money', callback_data: 'send' }
         ],
         [
-          { text: '🌐 เปลี่ยนภาษา / Change Language', callback_data: 'change_language' }
+          { text: '📋 History', callback_data: 'history' },
+          { text: '🌐 Change Language', callback_data: 'change_language' }
         ],
         [
-          { text: '📋 ' + messages.helpTitle, callback_data: 'help' }
+          { text: '⚙️ Settings', callback_data: 'settings' },
+          { text: '💬 Help', callback_data: 'help' }
         ]
       ]
     };
 
-    await ctx.reply(welcomeMessage, {
+    await ctx.reply(welcomeMessage + '\n\n' + messages.mainMenu, {
       reply_markup: keyboard,
       parse_mode: 'HTML'
     });
@@ -51,7 +50,7 @@ export async function handleLanguageChange(ctx) {
     const languageKeyboard = createLanguageKeyboard();
     
     await ctx.editMessageText(
-      '🌐 เลือกภาษา / Choose Language / 选择语言 / ភាសា / 언어 선택 / Pilih Bahasa:',
+      '🌐 Select Language / Choose Language / 选择语言 / ភាសា / 언어 선택 / Pilih Bahasa:',
       {
         reply_markup: languageKeyboard,
         parse_mode: 'HTML'

@@ -1,1133 +1,1067 @@
 /**
- * DOGLC Digital Wallet - Main Telegram Bot
- * Enhanced with advanced security, multi-worker integration, and OCR processing
- * Production-ready with comprehensive error handling and monitoring
- * Version 2.1 - Optimized Performance Edition
+ * 🤖 DOGLC DIGITAL WALLET - MAIN BOT
+ * Enhanced with multi-language support and full features
  */
 
-import { Telegraf } from 'telegraf';
-import { handleStart } from './handlers/start.js';
-import { handleWallet } from './handlers/wallet.js';
-import { handleHelp } from './handlers/help.js';
-import { handleDeposit } from './handlers/deposit.js';
-import { handleWithdraw } from './handlers/withdraw.js';
-import { handleSend } from './handlers/send.js';
-import { handleReceive } from './handlers/receive.js';
-import { handleHistory } from './handlers/history.js';
-import { handleMarket } from './handlers/market.js';
-import { handleVIP } from './handlers/vip.js';
-import { handleLanguageChange as handleLanguageChangeHandler } from './handlers/language.js';
-import { handleExchangeRateView, handleCalculationMenu, handleBankAccounts, handleSlipUpload as handleSlipUploadHandler } from './handlers/exchangeHandlers.js';
-import { handleAdminCommand, handleUserManagement, handleTransactionManagement, handleSystemSettings, handleOCRSystemMonitoring, handleAlertsManagement, handleAnalytics } from './handlers/admin.js';
-import { handleFeeManagement, handleDepositFeeManagement, handleWithdrawFeeManagement, handleVIPUpgradeFeeManagement, handleFeeRevenueReport } from './handlers/feeManagement.js';
-import { handleBankAccountManagement, handleListBankAccounts, handleAddBankAccount, handleSuspendBankAccount, handleActivateBankAccount, handleDeleteBankAccount, handleBankUsageStats } from './handlers/bankAccountManagement.js';
-import { getMessages, detectUserLanguage } from './locales/index.js';
-import { checkRateLimit, hashUserId, sanitizeInput, logUserActivity, formatCurrency, calculateFee, getUserState, setUserState, clearUserState, logPerformanceMetric } from './utils/helpers.js';
-import { getConfig, validateConfig } from './utils/config.js';
-import { logSecurityEvent } from './utils/security-logger.js';
-
-// Performance optimization imports
-import { OptimizedFileUploader, handleSlipPhotoUploadOptimized } from './utils/optimized-file-handler.js';
-import { OptimizedDatabaseManager, getOptimizedDatabase } from './utils/optimized-database.js';
-import { SecureJWTManager } from './utils/secure-jwt.js';
-import { initializePerformanceOptimizations } from './utils/enhanced-performance.js';
+import 'dotenv/config';
+import { getMessages, detectUserLanguage, formatMessage, getLanguageDisplay } from './locales/index.js';
+import { WalletManager, formatCurrency, convertCurrency } from './utils/wallet.js';
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const path = url.pathname;
     
-    // Security Middleware - Path Traversal Protection
-    if (path.includes('..') || 
-        path.includes('%2e%2e') || 
-        path.includes('..%2f') || 
-        path.includes('..\\') ||
-        path.includes('%2e%2e%2f') ||
-        path.includes('%5c%2e%2e') ||
-        path.includes('..%5c')) {
-      await logSecurityEvent('PATH_TRAVERSAL_ATTEMPT', null, {
-        path: path,
-        url: url.toString(),
-        userAgent: request.headers.get('User-Agent'),
-        ip: request.headers.get('CF-Connecting-IP'),
-        timestamp: new Date().toISOString()
-      }, env);
-      
-      return Response.json({
-        error: 'Path traversal attempt detected',
-        code: 'SECURITY_VIOLATION'
-      }, { status: 403 });
-    }
+    // Initialize Wallet Manager
+    const walletManager = new WalletManager(env);
     
-    // Rate Limiting Middleware (Global)
-    const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
-    const rateLimitKey = `rate_limit:${clientIP}`;
-    
-    if (env.RATE_KV) {
-      try {
-        const currentTime = Math.floor(Date.now() / 1000);
-        const windowDuration = 60; // 1 minute window
-        const maxRequests = 50; // Max 50 requests per minute per IP
-        
-        const existing = await env.RATE_KV.get(rateLimitKey);
-        let requests = [];
-        
-        if (existing) {
-          requests = JSON.parse(existing);
-          // Filter out old requests (outside the window)
-          requests = requests.filter(timestamp => currentTime - timestamp < windowDuration);
-        }
-        
-        if (requests.length >= maxRequests) {
-          await logSecurityEvent('RATE_LIMIT_EXCEEDED', null, {
-            ip: clientIP,
-            path: path,
-            requestCount: requests.length,
-            maxRequests: maxRequests,
-            timestamp: new Date().toISOString()
-          }, env);
-          
-          return Response.json({
-            error: 'Rate limit exceeded',
-            code: 'RATE_LIMIT_EXCEEDED',
-            retryAfter: windowDuration
-          }, { 
-            status: 429,
-            headers: {
-              'Retry-After': windowDuration.toString(),
-              'X-RateLimit-Limit': maxRequests.toString(),
-              'X-RateLimit-Remaining': '0',
-              'X-RateLimit-Reset': (currentTime + windowDuration).toString()
-            }
-          });
-        }
-        
-        // Add current request
-        requests.push(currentTime);
-        await env.RATE_KV.put(rateLimitKey, JSON.stringify(requests), {
-          expirationTtl: windowDuration * 2 // Keep for 2x window duration
-        });
-      } catch (error) {
-        console.warn('Rate limiting error:', error);
-        // Continue without rate limiting if KV fails
-      }
-    }
-
-    // Health check endpoint
-    if (path === '/health' || path === '/') {
+    // Health check
+    if (request.method === 'GET') {
       return Response.json({
         status: 'ok',
-        service: 'doglc-main-bot',
-        version: '2.1-security-enhanced',
+        service: 'doglc-digital-wallet',
+        version: '3.0-full-features',
         features: [
           'multi_language_support',
-          'advanced_security',
-          'path_traversal_protection',
-          'rate_limiting',
-          'audit_logging',
-          'ocr_integration',
-          'banking_operations',
-          'miniapp_api'
+          'wallet_management', 
+          'deposit_withdrawal',
+          'money_transfer',
+          'security_system',
+          'analytics_monitoring'
         ],
-        security: {
-          pathTraversalProtection: true,
-          rateLimiting: !!env.RATE_KV,
-          securityLogging: true
-        },
+        supported_languages: ['th', 'en', 'zh', 'km', 'ko', 'id'],
         timestamp: new Date().toISOString(),
         uptime: Date.now()
       });
     }
-
-    // API endpoints for MiniApp frontend
-    if (path.startsWith('/api/')) {
-      return await handleAPIRequest(request, env, ctx);
-    }
-
-    // Validate configuration on startup
-    const configValid = validateConfig(env);
-    if (!configValid.valid) {
-      console.error('Configuration validation failed:', configValid.errors);
-      return Response.json({
-        error: 'Configuration Error',
-        details: configValid.errors
-      }, { status: 500 });
-    }
-
-    try {
-      // Initialize bot with enhanced configuration
-      const config = getConfig(env);
-      const bot = new Telegraf(config.telegram.botToken);
-
-      // Initialize optimized components
-      const optimizedDB = getOptimizedDatabase(env);
-      const fileUploader = new OptimizedFileUploader(env);
-      const jwtManager = new SecureJWTManager(env);
-      const performanceOpts = initializePerformanceOptimizations(env);
-
-      // Set up webhook secret validation
-      if (config.telegram.webhookSecret) {
-        bot.secretToken = config.telegram.webhookSecret;
-      }
-
-      // Enhanced middleware with security and monitoring
-      bot.use(async (ctx, next) => {
-        const startTime = Date.now();
-        const userId = ctx.from?.id?.toString();
-        const messageId = ctx.message?.message_id;
-        const chatId = ctx.chat?.id?.toString();
-
-        try {
-          // Security validations
-          if (!userId) {
-            await logSecurityEvent('INVALID_USER', null, {
-              chat_id: chatId,
-              message_id: messageId,
-              type: 'missing_user_id'
-            }, env);
-            return;
-          }
-
-          // Input sanitization
-          if (ctx.message?.text) {
-            ctx.message.text = sanitizeInput(ctx.message.text);
-          }
-
-          // Detect user language with enhanced detection
-          const userLang = detectUserLanguage(ctx.from);
-          const messages = getMessages(userLang);
-          ctx.userLanguage = userLang;
-          ctx.messages = messages;
-
-          // Attach optimized components to context
-          ctx.optimizedDB = optimizedDB;
-          ctx.fileUploader = fileUploader;
-          ctx.jwtManager = jwtManager;
-          ctx.performanceOpts = performanceOpts;
-
-          // Enhanced rate limiting with multiple tiers
-          const rateLimitConfig = config.security.rateLimit;
-          const isAllowed = await checkRateLimit(
-            userId,
-            env.RATE_KV,
-            rateLimitConfig.maxRequests,
-            rateLimitConfig.windowSeconds
-          );
-          
-          if (!isAllowed) {
-            await logSecurityEvent('RATE_LIMIT_EXCEEDED', userId, {
-              chat_id: chatId,
-              user_language: userLang
-            }, env);
-            await ctx.reply(messages.rateLimitExceeded);
-            return;
-          }
-
-          // User activity logging
-          await logUserActivity(userId, {
-            action: ctx.message?.text || ctx.callbackQuery?.data || 'unknown',
-            chat_id: chatId,
-            message_id: messageId,
-            language: userLang,
-            timestamp: new Date().toISOString()
-          }, env);
-
-          await next();
-
-          // Performance monitoring
-          const processingTime = Date.now() - startTime;
-          if (processingTime > 5000) { // Log slow responses
-            await logPerformanceMetric('SLOW_RESPONSE', {
-              user_id: userId,
-              processing_time: processingTime,
-              action: ctx.message?.text || ctx.callbackQuery?.data
-            }, env);
-          }
-
-        } catch (error) {
-          console.error('Middleware error:', error);
-          await logSecurityEvent('MIDDLEWARE_ERROR', userId, {
-            error: error.message,
-            stack: error.stack
-          }, env);
-          
-          if (ctx.messages) {
-            await ctx.reply(ctx.messages.errorOccurred);
-          }
-        }
-      });
-
-      // Register all command handlers
-      bot.start(handleStart);
-      bot.command('wallet', handleWallet);
-      bot.command('balance', async (ctx) => {
-        await handleWallet(ctx, 'balance');
-      });
-      bot.command('deposit', async (ctx) => {
-        await handleDeposit(ctx);
-      });
-      bot.command('withdraw', async (ctx) => {
-        await handleWithdraw(ctx);
-      });
-      bot.command('send', async (ctx) => {
-        await handleSend(ctx);
-      });
-      bot.command('receive', async (ctx) => {
-        await handleReceive(ctx);
-      });
-      bot.command('history', async (ctx) => {
-        await handleHistory(ctx);
-      });
-      bot.command('market', async (ctx) => {
-        await handleMarket(ctx);
-      });
-      bot.command('vip', async (ctx) => {
-        await handleVIP(ctx);
-      });
-      bot.command('help', handleHelp);
-      
-      // Admin commands (protected)
-      bot.command('admin', async (ctx) => {
-        await handleAdminCommand(ctx, env);
-      });
-      bot.command('masteradmin', async (ctx) => {
-        await handleAdminCommand(ctx, env);
-      });
-      bot.command('superadmin', async (ctx) => {
-        await handleAdminCommand(ctx, env);
-      });
-      
-      // Handle all callback queries (button clicks) - Enhanced Performance
-      bot.on('callback_query', async (ctx) => {
-        try {
-          const data = ctx.callbackQuery.data;
-          
-          // Use optimized callback handler for better performance
-          const result = await performanceOpts.callbackHandler.handleCallback(ctx, data);
-          
-          if (result.action === 'show_main_menu') {
-            await handleStart(ctx);
-            return;
-          }
-          
-          if (result.action === 'go_back') {
-            await handleStart(ctx);
-            return;
-          }
-          
-          // If optimized handler didn't process, fall back to traditional handling
-          if (!result.processed) {
-            await handleCallbackQueryTraditional(ctx, data);
-          }
-          
-        } catch (error) {
-          console.error('Callback query error:', error);
-          await ctx.answerCbQuery('❌ เกิดข้อผิดพลาด / Error occurred');
-          
-          await logSecurityEvent('CALLBACK_ERROR', ctx.from.id.toString(), {
-            callback_data: data,
-            error: error.message
-          }, env);
-        }
-      });
-
-      // Traditional callback handling (fallback)
-      async function handleCallbackQueryTraditional(ctx, data) {
-        try {
-          const messages = ctx.messages; // Add this line to get messages from context
-          
-          // Wallet-related callbacks
-        if (data === 'wallet') {
-          await handleWallet(ctx);
-        } else if (data === 'balance') {
-          await handleWallet(ctx, 'balance');
-        } else if (data.startsWith('deposit')) {
-          if (data === 'deposit_menu') {
-            await handleDeposit(ctx, 'menu');
-          } else if (data === 'deposit_thb') {
-            await handleDeposit(ctx, 'thb');
-          } else if (data === 'deposit_usdt') {
-            await handleDeposit(ctx, 'usdt');
-          }
-        } else if (data.startsWith('withdraw')) {
-          if (data === 'withdraw_menu') {
-            await handleWithdraw(ctx, 'menu');
-          } else if (data === 'withdraw_usdt') {
-            await handleWithdraw(ctx, 'usdt');
-          } else if (data === 'withdraw_thb') {
-            await handleWithdraw(ctx, 'thb');
-          }
-        } else if (data === 'view_exchange_rate') {
-          await handleExchangeRateView(ctx, env, messages);
-        } else if (data === 'calculate_thb_usdt' || data === 'calculate_conversion') {
-          await handleCalculationMenu(ctx, env, messages);
-        } else if (data === 'deposit_bank_accounts') {
-          await handleBankAccounts(ctx, env, messages);
-        } else if (data === 'upload_slip') {
-          await handleSlipUploadHandler(ctx, env, messages);
-        } else if (data.startsWith('admin_')) {
-          // Admin callback handlers
-          const action = data.replace('admin_', '');
-          if (action === 'main') {
-            await handleAdminCommand(ctx, env);
-          } else if (action === 'users') {
-            await handleUserManagement(ctx, env);
-          } else if (action === 'transactions') {
-            await handleTransactionManagement(ctx, env);
-          } else if (action === 'system_settings') {
-            await handleSystemSettings(ctx, env);
-          } else if (action === 'ocr_monitoring') {
-            await handleOCRSystemMonitoring(ctx, env);
-          } else if (action === 'alerts_management') {
-            await handleAlertsManagement(ctx, env);
-          } else if (action === 'analytics') {
-            await handleAnalytics(ctx, env);
-          } else if (action === 'bank_management') {
-            await handleBankAccountManagement(ctx, env);
-          }
-        } else if (data.startsWith('fee_')) {
-          // Fee management callbacks
-          const action = data.replace('fee_', '');
-          if (action === 'management') {
-            await handleFeeManagement(ctx, env);
-          } else if (action === 'deposit') {
-            await handleDepositFeeManagement(ctx, env);
-          } else if (action === 'withdraw') {
-            await handleWithdrawFeeManagement(ctx, env);
-          } else if (action === 'vip_upgrade') {
-            await handleVIPUpgradeFeeManagement(ctx, env);
-          } else if (action === 'revenue_report') {
-            await handleFeeRevenueReport(ctx, env);
-          }
-        } else if (data.startsWith('bank_')) {
-          // Bank account management callbacks
-          const action = data.replace('bank_', '');
-          if (action === 'management') {
-            await handleBankAccountManagement(ctx, env);
-          } else if (action === 'list_accounts') {
-            await handleListBankAccounts(ctx, env);
-          } else if (action === 'add_account') {
-            await handleAddBankAccount(ctx, env);
-          } else if (action.startsWith('suspend_')) {
-            const bankId = action.replace('suspend_', '');
-            await handleBankAccountSuspend(ctx, env, bankId);
-          } else if (action.startsWith('activate_')) {
-            const bankId = action.replace('activate_', '');
-            await handleBankAccountActivate(ctx, env, bankId);
-          } else if (action.startsWith('delete_')) {
-            const bankId = action.replace('delete_', '');
-            await handleBankAccountDelete(ctx, env, bankId);
-          } else if (action === 'usage_stats') {
-            await handleBankUsageStats(ctx, env);
-          } else if (action === 'suspend_account') {
-            await handleSuspendBankAccount(ctx, env);
-          } else if (action === 'activate_account') {
-            await handleActivateBankAccount(ctx, env);
-          } else if (action === 'delete_account') {
-            await handleDeleteBankAccount(ctx, env);
-          }
-        } else if (data.startsWith('send')) {
-          if (data === 'send_menu') {
-            await handleSend(ctx, 'menu');
-          } else if (data === 'send_internal') {
-            await handleSend(ctx, 'internal');
-          } else if (data === 'send_external') {
-            await handleSend(ctx, 'external');
-          }
-        } else if (data.startsWith('receive') || data === 'create_qr_code') {
-          if (data === 'receive_menu') {
-            await handleReceive(ctx, 'menu');
-          } else if (data === 'create_qr_code') {
-            await handleReceive(ctx, 'qr');
-          }
-        } else if (data.startsWith('history')) {
-          if (data === 'history_all') {
-            await handleHistory(ctx, 'all');
-          } else if (data === 'history_deposit') {
-            await handleHistory(ctx, 'deposit');
-          } else if (data === 'history_withdraw') {
-            await handleHistory(ctx, 'withdraw');
-          } else if (data === 'history_transfer') {
-            await handleHistory(ctx, 'transfer');
-          }
-        } else if (data.startsWith('market')) {
-          if (data === 'market_overview') {
-            await handleMarket(ctx, 'overview');
-          } else if (data === 'market_prices') {
-            await handleMarket(ctx, 'prices');
-          } else if (data === 'market_alerts') {
-            await handleMarket(ctx, 'alerts');
-          }
-        } else if (data.startsWith('vip')) {
-          if (data === 'vip_status') {
-            await handleVIP(ctx, 'status');
-          } else if (data === 'vip_upgrade') {
-            await handleVIP(ctx, 'upgrade');
-          } else if (data === 'vip_benefits') {
-            await handleVIP(ctx, 'benefits');
-          }
-        } else if (data === 'help') {
-          await handleHelp(ctx);
-        } else if (data === 'start') {
-          await handleStart(ctx);
-        } else if (data === 'change_language') {
-          await handleLanguageChangeHandler(ctx);
-        }
-        
-          // Answer callback query to remove loading state
-          await ctx.answerCbQuery();
-          
-        } catch (error) {
-          console.error('Callback query error:', error);
-          await ctx.answerCbQuery('เกิดข้อผิดพลาด / Error occurred');
-        }
-      } // Close handleCallbackQueryTraditional function
-
-    // Handle language selection
-    bot.action(/^lang_(.+)$/, async (ctx) => {
-      const selectedLang = ctx.match[1];
-      const messages = getMessages(selectedLang);
-      
-      // Store user language preference in KV
-      if (env.USER_SESSIONS) {
-        await env.USER_SESSIONS.put(
-          `lang_${ctx.from.id}`, 
-          selectedLang,
-          { expirationTtl: 86400 * 30 } // 30 days
-        );
-      }
-      
-      await ctx.editMessageText(messages.welcome, {
-        parse_mode: 'HTML'
-      });
-    });
-
-    // Handle all messages - Enhanced Performance
-    bot.on('message', async (ctx) => {
-      try {
-        // Use optimized message processor for better performance
-        if (ctx.message?.text?.startsWith('/') || ctx.message?.text) {
-          const result = await performanceOpts.messageProcessor.processMessage(ctx);
-          
-          if (result.processed) {
-            return; // Message was handled by optimized processor
-          }
-        }
-        
-        // Fallback for unknown commands
-        if (ctx.message?.text?.startsWith('/')) {
-          await ctx.reply(ctx.messages.unknownCommand);
-        }
-      } catch (error) {
-        console.error('Message processing error:', error);
-        await ctx.reply('❌ เกิดข้อผิดพลาดในการประมวลผล / Processing error');
-      }
-    });
-
+    
     // Handle webhook
     if (request.method === 'POST') {
-      const update = await request.json();
-      await bot.handleUpdate(update);
-      return new Response('OK');
-    }
-
-    // Handle GET requests (for webhook setup and health check)
-    if (request.method === 'GET') {
-      const url = new URL(request.url);
-      
-      // Health check endpoint
-      if (url.pathname === '/health') {
-        return new Response(JSON.stringify({
-          status: 'healthy',
-          timestamp: new Date().toISOString(),
-          version: '1.0.0',
-          features: {
-            multiLanguage: true,
-            rateLimiting: true,
-            banking: true,
-            security: true
+      try {
+        const update = await request.json();
+        
+        // Initialize Telegraf bot
+        const { Telegraf } = await import('telegraf');
+        const bot = new Telegraf(env.TELEGRAM_BOT_TOKEN || env.BOT_TOKEN);
+        
+        // === MIDDLEWARE SETUP ===
+        bot.use(async (ctx, next) => {
+          try {
+            // User session data
+            ctx.userId = ctx.from?.id;
+            ctx.chatId = ctx.chat?.id;
+            
+            // Check for saved user language preference first
+            let userLang = 'en'; // Default to English
+            
+            if (ctx.userId && env.USER_SESSIONS) {
+              try {
+                const userSession = await env.USER_SESSIONS.get(`lang_${ctx.userId}`);
+                if (userSession) {
+                  userLang = userSession;
+                }
+              } catch (error) {
+                console.log('Could not load user language preference:', error);
+                // Fall back to default English
+              }
+            }
+            
+            ctx.userLanguage = userLang;
+            ctx.messages = getMessages(userLang);
+            
+            // Add wallet manager to context
+            ctx.wallet = walletManager;
+            
+            // Rate limiting check (basic)
+            const rateLimitKey = `rate_${ctx.userId}`;
+            const now = Date.now();
+            
+            await next();
+            
+          } catch (error) {
+            console.error('Middleware error:', error);
+            const messages = getMessages('en'); // Always use English for errors
+            await ctx.reply(messages.errorOccurred);
           }
-        }), {
-          headers: { 'Content-Type': 'application/json' }
         });
-      }
-      
-      // Default response
-      return new Response(`
-        🤖 DOGLC Digital Wallet Bot is running!
         
-        Features:
-        • 🌐 Multi-language support (6 languages)
-        • 💳 Digital wallet functionality
-        • 🔐 Advanced security
-        • 📊 Real-time market data
-        • 🎮 Gamification system
+        // === START COMMAND ===
+        bot.start(async (ctx) => {
+          try {
+            const messages = ctx.messages;
+            
+            const keyboard = {
+              inline_keyboard: [
+                [
+                  { text: messages.balanceBtn, callback_data: 'balance' },
+                  { text: messages.depositBtn, callback_data: 'deposit' }
+                ],
+                [
+                  { text: messages.withdrawBtn, callback_data: 'withdraw' },
+                  { text: messages.sendBtn, callback_data: 'send' }
+                ],
+                [
+                  { text: messages.historyBtn, callback_data: 'history' },
+                  { text: messages.languageBtn, callback_data: 'change_language' }
+                ],
+                [
+                  { text: messages.settingsBtn, callback_data: 'settings' },
+                  { text: messages.helpBtn, callback_data: 'help' }
+                ]
+              ]
+            };
+            
+            await ctx.reply(messages.welcome, {
+              reply_markup: keyboard,
+              parse_mode: 'HTML'
+            });
+            
+          } catch (error) {
+            console.error('Start error:', error);
+            await ctx.reply(ctx.messages.errorOccurred);
+          }
+        });
         
-        Bot Username: @${env.TELEGRAM_BOT_USERNAME || 'DoglcWallet_Bot'}
-      `);
-    }
+        // === CALLBACK HANDLERS ===
+        bot.on('callback_query', async (ctx) => {
+          try {
+            const data = ctx.callbackQuery.data;
+            const messages = ctx.messages;
+            
+            let responseMessage = '';
+            let keyboard = {};
+            
+            switch (data) {
+              case 'wallet':
+                // ดึงข้อมูล wallet จริง
+                let userWallet = await ctx.wallet.getWallet(ctx.userId);
+                
+                if (!userWallet) {
+                  // สร้าง wallet ใหม่ถ้ายังไม่มี
+                  userWallet = await ctx.wallet.createWallet(ctx.userId, {
+                    firstName: ctx.from.first_name,
+                    username: ctx.from.username
+                  });
+                }
+                
+                responseMessage = ctx.messages.walletDetails
+                  .replace('{thbBalance}', formatCurrency(userWallet.balances.THB, 'THB'))
+                  .replace('{usdtBalance}', formatCurrency(userWallet.balances.USDT, 'USDT'))
+                  .replace('{totalTransactions}', userWallet.statistics.totalTransactions)
+                  .replace('{totalDeposits}', formatCurrency(userWallet.statistics.totalDeposits, 'THB'))
+                  .replace('{address}', userWallet.address)
+                  .replace('{updatedAt}', new Date(userWallet.updatedAt).toLocaleString('en-US'));
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: ctx.messages.depositBtn, callback_data: 'deposit' },
+                      { text: ctx.messages.withdrawBtn, callback_data: 'withdraw' }
+                    ],
+                    [
+                      { text: ctx.messages.sendBtn, callback_data: 'send' },
+                      { text: ctx.messages.historyBtn, callback_data: 'history' }
+                    ],
+                    [
+                      { text: ctx.messages.backToMainBtn, callback_data: 'start' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'balance':
+                // ดึงข้อมูล wallet และแสดงยอดเงินแบบละเอียด
+                const walletData = await ctx.wallet.getWallet(ctx.userId);
+                
+                if (!walletData) {
+                  responseMessage = ctx.messages.noWalletBalance;
+                } else {
+                  const totalValueTHB = walletData.balances.THB + convertCurrency(walletData.balances.USDT, 'USDT', 'THB');
+                  const totalValueUSD = convertCurrency(totalValueTHB, 'THB', 'USDT');
+                  
+                  responseMessage = ctx.messages.balanceDetails
+                    .replace('{thbBalance}', formatCurrency(walletData.balances.THB, 'THB'))
+                    .replace('{usdtBalance}', formatCurrency(walletData.balances.USDT, 'USDT'))
+                    .replace('{totalValueTHB}', formatCurrency(totalValueTHB, 'THB'))
+                    .replace('{totalValueUSD}', totalValueUSD.toFixed(2))
+                    .replace('{timestamp}', new Date(walletData.updatedAt).toLocaleString('en-US'));
+                }
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: ctx.messages.refreshBtn, callback_data: 'balance' },
+                      { text: ctx.messages.chartBtn, callback_data: 'chart' }
+                    ],
+                    [
+                      { text: ctx.messages.backBtn, callback_data: 'wallet' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'deposit_thb':
+                const depositAddressTHB = ctx.wallet.generateDepositAddress(ctx.userId, 'THB');
+                
+                responseMessage = ctx.messages.depositTHB.replace('{depositAddress}', depositAddressTHB);
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: ctx.messages.demoDeposit100, callback_data: 'demo_deposit_100' },
+                      { text: ctx.messages.demoDeposit500, callback_data: 'demo_deposit_500' }
+                    ],
+                    [
+                      { text: ctx.messages.sendSlipBtn, callback_data: 'upload_slip' }
+                    ],
+                    [
+                      { text: ctx.messages.backBtn, callback_data: 'deposit' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'deposit_usdt':
+                const depositAddressUSDT = ctx.wallet.generateDepositAddress(ctx.userId, 'USDT');
+                
+                responseMessage = ctx.messages.depositUSDT.replace('{depositAddress}', depositAddressUSDT);
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: ctx.messages.demoDeposit10USDT, callback_data: 'demo_deposit_10_usdt' },
+                      { text: ctx.messages.demoDeposit50USDT, callback_data: 'demo_deposit_50_usdt' }
+                    ],
+                    [
+                      { text: ctx.messages.checkDepositStatus, callback_data: 'check_deposit_status' }
+                    ],
+                    [
+                      { text: ctx.messages.backBtn, callback_data: 'deposit' }
+                    ]
+                  ]
+                };
+                break;
+                
+              // Demo deposit handlers
+              case 'demo_deposit_100':
+                try {
+                  await ctx.wallet.updateBalance(ctx.userId, 'THB', 100, 'add');
+                  await ctx.wallet.addTransaction(ctx.userId, {
+                    type: 'deposit',
+                    currency: 'THB',
+                    amount: 100,
+                    method: 'bank_transfer',
+                    description: 'Demo deposit - Bank Transfer',
+                    status: 'completed'
+                  });
+                  
+                  responseMessage = `✅ <b>ฝากเงินสำเร็จ!</b>
 
+💰 <b>รายละเอียด:</b>
+• จำนวน: 100.00 บาท
+• ประเภท: โอนธนาคาร (Demo)
+• สถานะ: สำเร็จ
+• เวลา: ${new Date().toLocaleString('th-TH')}
+
+🎉 ยอดเงินในกระเป๋าของคุณได้รับการอัพเดทแล้ว!`;
+                  
+                  keyboard = {
+                    inline_keyboard: [
+                      [
+                        { text: '💰 ดูยอดเงิน', callback_data: 'balance' },
+                        { text: '📋 ดูประวัติ', callback_data: 'history' }
+                      ],
+                      [
+                        { text: '🔙 กลับหน้าหลัก', callback_data: 'start' }
+                      ]
+                    ]
+                  };
+                } catch (error) {
+                  responseMessage = `❌ <b>เกิดข้อผิดพลาด</b>
+
+ไม่สามารถประมวลผลการฝากเงินได้ กรุณาลองใหม่อีกครั้ง`;
+                  
+                  keyboard = {
+                    inline_keyboard: [
+                      [{ text: '🔙 กลับ', callback_data: 'deposit_thb' }]
+                    ]
+                  };
+                }
+                break;
+                
+              case 'demo_deposit_500':
+                try {
+                  await ctx.wallet.updateBalance(ctx.userId, 'THB', 500, 'add');
+                  await ctx.wallet.addTransaction(ctx.userId, {
+                    type: 'deposit',
+                    currency: 'THB',
+                    amount: 500,
+                    method: 'bank_transfer',
+                    description: 'Demo deposit - Bank Transfer',
+                    status: 'completed'
+                  });
+                  
+                  responseMessage = `✅ <b>ฝากเงินสำเร็จ!</b>
+
+💰 <b>รายละเอียด:</b>
+• จำนวน: 500.00 บาท
+• ประเภท: โอนธนาคาร (Demo)
+• สถานะ: สำเร็จ
+• เวลา: ${new Date().toLocaleString('th-TH')}
+
+🎉 ยอดเงินในกระเป๋าของคุณได้รับการอัพเดทแล้ว!`;
+                  
+                  keyboard = {
+                    inline_keyboard: [
+                      [
+                        { text: '💰 ดูยอดเงิน', callback_data: 'balance' },
+                        { text: '📋 ดูประวัติ', callback_data: 'history' }
+                      ],
+                      [
+                        { text: '🔙 กลับหน้าหลัก', callback_data: 'start' }
+                      ]
+                    ]
+                  };
+                } catch (error) {
+                  responseMessage = `❌ <b>เกิดข้อผิดพลาด</b>
+
+ไม่สามารถประมวลผลการฝากเงินได้ กรุณาลองใหม่อีกครั้ง`;
+                  
+                  keyboard = {
+                    inline_keyboard: [
+                      [{ text: '🔙 กลับ', callback_data: 'deposit_thb' }]
+                    ]
+                  };
+                }
+                break;
+                
+              case 'demo_deposit_10_usdt':
+                try {
+                  await ctx.wallet.updateBalance(ctx.userId, 'USDT', 10, 'add');
+                  await ctx.wallet.addTransaction(ctx.userId, {
+                    type: 'deposit',
+                    currency: 'USDT',
+                    amount: 10,
+                    method: 'crypto_transfer',
+                    description: 'Demo deposit - USDT TRC-20',
+                    status: 'completed'
+                  });
+                  
+                  responseMessage = `✅ <b>ฝาก USDT สำเร็จ!</b>
+
+🔷 <b>รายละเอียด:</b>
+• จำนวน: 10.00 USDT
+• Network: TRC-20 (Demo)
+• สถานะ: สำเร็จ
+• เวลา: ${new Date().toLocaleString('th-TH')}
+
+💎 ยอด USDT ในกระเป๋าของคุณได้รับการอัพเดทแล้ว!`;
+                  
+                  keyboard = {
+                    inline_keyboard: [
+                      [
+                        { text: '💰 ดูยอดเงิน', callback_data: 'balance' },
+                        { text: '📋 ดูประวัติ', callback_data: 'history' }
+                      ],
+                      [
+                        { text: '🔙 กลับหน้าหลัก', callback_data: 'start' }
+                      ]
+                    ]
+                  };
+                } catch (error) {
+                  responseMessage = `❌ <b>เกิดข้อผิดพลาด</b>
+
+ไม่สามารถประมวลผลการฝากเงินได้ กรุณาลองใหม่อีกครั้ง`;
+                  
+                  keyboard = {
+                    inline_keyboard: [
+                      [{ text: '🔙 กลับ', callback_data: 'deposit_usdt' }]
+                    ]
+                  };
+                }
+                break;
+                
+              case 'withdraw':
+                responseMessage = `📥 <b>ถอนเงิน</b>
+
+เลือกสกุลเงินที่ต้องการถอน:
+
+💰 <b>THB (บาท):</b>
+• ไปยังบัญชีธนาคาร
+• ขั้นต่ำ 100 บาท
+• ค่าธรรมเนียม 10 บาท
+
+🔷 <b>USDT:</b>
+• ไปยัง Wallet Address
+• ขั้นต่ำ 10 USDT
+• ค่าธรรมเนียม Network`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '💰 ถอน THB', callback_data: 'withdraw_thb' },
+                      { text: '🔷 ถอน USDT', callback_data: 'withdraw_usdt' }
+                    ],
+                    [
+                      { text: '📋 ดูคำแนะนำ', callback_data: 'withdraw_guide' }
+                    ],
+                    [
+                      { text: '🔙 กลับ', callback_data: 'wallet' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'send':
+                responseMessage = `📨 <b>ส่งเงิน</b>
+
+เลือกประเภทการส่งเงิน:
+
+👥 <b>ส่งภายใน:</b>
+• ส่งให้ผู้ใช้ในระบบ
+• ไม่มีค่าธรรมเนียม
+• ทันที
+
+🌐 <b>ส่งภายนอก:</b>
+• ส่งไปธนาคาร/กระเป๋าเงินอื่น
+• มีค่าธรรมเนียม
+• 5-30 นาที`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '👥 ส่งภายใน', callback_data: 'send_internal' },
+                      { text: '🌐 ส่งภายนอก', callback_data: 'send_external' }
+                    ],
+                    [
+                      { text: '📱 QR Code', callback_data: 'send_qr' }
+                    ],
+                    [
+                      { text: '🔙 กลับ', callback_data: 'wallet' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'history':
+                // ดึงประวัติธุรกรรมจริง
+                const transactions = await ctx.wallet.getTransactionHistory(ctx.userId, 10);
+                const summary = await ctx.wallet.generateSummaryReport(ctx.userId);
+                
+                if (!summary) {
+                  responseMessage = `📋 <b>ประวัติธุรกรรม</b>
+
+❌ ไม่พบกระเป๋าเงิน กรุณาสร้างกระเป๋าเงินก่อน`;
+                } else {
+                  let transactionList = '';
+                  if (transactions.length === 0) {
+                    transactionList = '• ไม่มีธุรกรรม';
+                  } else {
+                    transactions.slice(0, 5).forEach((tx, index) => {
+                      const date = new Date(tx.timestamp).toLocaleDateString('th-TH');
+                      const time = new Date(tx.timestamp).toLocaleTimeString('th-TH', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      });
+                      transactionList += `• ${tx.type} ${tx.amount} ${tx.currency} (${date} ${time})\n`;
+                    });
+                  }
+                  
+                  responseMessage = `📋 <b>ประวัติธุรกรรม</b>
+
+📅 <b>วันนี้:</b> ${summary.recentActivity.today} ธุรกรรม
+📊 <b>สัปดาห์นี้:</b> ${summary.recentActivity.thisWeek} ธุรกรรม  
+📈 <b>เดือนนี้:</b> ${summary.recentActivity.thisMonth} ธุรกรรม
+
+🏆 <b>ธุรกรรมล่าสุด:</b>
+${transactionList}
+
+💡 <b>ยอดรวมทั้งหมด:</b> ${summary.statistics.totalTransactions} ครั้ง`;
+                }
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '📊 รายงานสรุป', callback_data: 'history_summary' },
+                      { text: '📱 ส่งออก PDF', callback_data: 'export_pdf' }
+                    ],
+                    [
+                      { text: '🔙 กลับ', callback_data: 'wallet' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'change_language':
+                responseMessage = `🌐 <b>เลือกภาษา / Select Language</b>
+
+เลือกภาษาที่ต้องการ:`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '🇹🇭 ไทย', callback_data: 'lang_th' },
+                      { text: '🇺🇸 English', callback_data: 'lang_en' }
+                    ],
+                    [
+                      { text: '🇨🇳 中文', callback_data: 'lang_zh' },
+                      { text: '🇰🇭 ខ្មែរ', callback_data: 'lang_km' }
+                    ],
+                    [
+                      { text: '🇰🇷 한국어', callback_data: 'lang_ko' },
+                      { text: '🇮🇩 Indonesia', callback_data: 'lang_id' }
+                    ],
+                    [
+                      { text: '🔙 กลับหน้าหลัก', callback_data: 'main_menu' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'settings':
+                responseMessage = ctx.messages.settingsMenu;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: ctx.messages.setPinBtn, callback_data: 'set_pin' },
+                      { text: ctx.messages.notificationBtn, callback_data: 'notifications' }
+                    ],
+                    [
+                      { text: ctx.messages.languageBtn, callback_data: 'change_language' }
+                    ],
+                    [
+                      { text: ctx.messages.backToMainBtn, callback_data: 'start' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'help':
+                responseMessage = ctx.messages.helpMenu;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '📋 FAQ', callback_data: 'faq' },
+                      { text: '💬 Live Chat', callback_data: 'live_chat' }
+                    ],
+                    [
+                      { text: ctx.messages.backToMainBtn, callback_data: 'main_menu' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'main_menu':
+                // Send main menu message same as /start
+                const welcomeMsg = ctx.messages.welcome.replace(/{username}/g, ctx.from?.username || ctx.from?.first_name || 'user');
+                responseMessage = welcomeMsg + '\n\n' + ctx.messages.mainMenu;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: ctx.messages.balanceBtn, callback_data: 'balance' },
+                      { text: ctx.messages.depositBtn, callback_data: 'deposit' }
+                    ],
+                    [
+                      { text: ctx.messages.withdrawBtn, callback_data: 'withdraw' },
+                      { text: ctx.messages.sendBtn, callback_data: 'send' }
+                    ],
+                    [
+                      { text: ctx.messages.historyBtn, callback_data: 'history' },
+                      { text: ctx.messages.languageBtn, callback_data: 'change_language' }
+                    ],
+                    [
+                      { text: ctx.messages.settingsBtn, callback_data: 'settings' },
+                      { text: ctx.messages.helpBtn, callback_data: 'help' }
+                    ]
+                  ]
+                };
+                break;
+                
+              // Language change handlers
+              case 'lang_th':
+              case 'lang_en':
+              case 'lang_zh':
+              case 'lang_km':
+              case 'lang_ko':
+              case 'lang_id':
+                const newLang = data.replace('lang_', '');
+                ctx.userLanguage = newLang;
+                ctx.messages = getMessages(newLang);
+                
+                // Save user language preference to KV storage
+                if (ctx.userId && env.USER_SESSIONS) {
+                  try {
+                    await env.USER_SESSIONS.put(`lang_${ctx.userId}`, newLang);
+                  } catch (error) {
+                    console.log('Could not save user language preference:', error);
+                  }
+                }
+                
+                responseMessage = ctx.messages.languageChanged.replace('{language}', getLanguageDisplay(newLang));
+                keyboard = {
+                  inline_keyboard: [
+                    [{ text: ctx.messages.backToMainBtn, callback_data: 'main_menu' }]
+                  ]
+                };
+                break;
+                
+              // Missing handlers - เพิ่มให้ครบ
+              case 'withdraw_thb':
+                responseMessage = `💰 <b>ถอนเงิน THB</b>
+
+🏦 <b>ข้อมูลการถอนเงิน:</b>
+• ขั้นต่ำ: 100 บาท
+• ค่าธรรมเนียม: 10 บาท
+• ระยะเวลา: 1-24 ชั่วโมง
+
+📋 <b>ขั้นตอน:</b>
+1. ระบุจำนวนเงินที่ต้องการถอน
+2. กรอกข้อมูลบัญชีธนาคาร
+3. ยืนยันการถอนเงิน
+4. รอการประมวลผล
+
+🚧 <b>สถานะ:</b> ฟีเจอร์กำลังพัฒนา`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '💰 ทดสอบถอน 50 บาท', callback_data: 'demo_withdraw_50' },
+                      { text: '💰 ทดสอบถอน 200 บาท', callback_data: 'demo_withdraw_200' }
+                    ],
+                    [
+                      { text: '🔙 กลับ', callback_data: 'withdraw' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'withdraw_usdt':
+                responseMessage = `🔷 <b>ถอน USDT</b>
+
+🔗 <b>ข้อมูลการถอนเงิน:</b>
+• ขั้นต่ำ: 10 USDT
+• ค่าธรรมเนียม: 2 USDT
+• Network: TRC-20 (Tron)
+• ระยะเวลา: 5-30 นาที
+
+📋 <b>ขั้นตอน:</b>
+1. ระบุจำนวน USDT ที่ต้องการถอน
+2. กรอก Wallet Address ปลายทาง
+3. ยืนยันการถอนเงิน
+4. รอ Network Confirmation
+
+🚧 <b>สถานะ:</b> ฟีเจอร์กำลังพัฒนา`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '🔷 ทดสอบถอน 5 USDT', callback_data: 'demo_withdraw_5_usdt' },
+                      { text: '🔷 ทดสอบถอน 20 USDT', callback_data: 'demo_withdraw_20_usdt' }
+                    ],
+                    [
+                      { text: '🔙 กลับ', callback_data: 'withdraw' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'send_internal':
+                responseMessage = `👥 <b>ส่งเงินภายใน</b>
+
+💫 <b>ส่งให้ผู้ใช้ในระบบ:</b>
+• ไม่มีค่าธรรมเนียม
+• ทันที (Real-time)
+• รองรับ THB และ USDT
+• ปลอดภัย 100%
+
+📋 <b>ขั้นตอน:</b>
+1. ระบุ User ID หรือ Username ผู้รับ
+2. เลือกสกุลเงินและจำนวน
+3. เพิ่มข้อความ (ถ้าต้องการ)
+4. ยืนยันการส่งเงิน
+
+🚧 <b>สถานะ:</b> ฟีเจอร์กำลังพัฒนา`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '💰 ส่ง THB', callback_data: 'send_thb_internal' },
+                      { text: '🔷 ส่ง USDT', callback_data: 'send_usdt_internal' }
+                    ],
+                    [
+                      { text: '🔙 กลับ', callback_data: 'send' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'send_external':
+                responseMessage = `🌐 <b>ส่งเงินภายนอก</b>
+
+🏦 <b>ส่งไปยังระบบภายนอก:</b>
+• ธนาคาร (THB)
+• Crypto Wallet (USDT)
+• มีค่าธรรมเนียม
+• ระยะเวลา 5-60 นาที
+
+📋 <b>ค่าธรรมเนียม:</b>
+• THB: 25 บาท + ค่าธรรมเนียมธนาคาร
+• USDT: 3 USDT + Network Fee
+
+🚧 <b>สถานะ:</b> ฟีเจอร์กำลังพัฒนา`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '🏦 ส่งไปธนาคาร', callback_data: 'send_bank' },
+                      { text: '🔷 ส่งไป Wallet', callback_data: 'send_crypto' }
+                    ],
+                    [
+                      { text: '🔙 กลับ', callback_data: 'send' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'qr_code':
+              case 'send_qr':
+                responseMessage = `📱 <b>QR Code สำหรับรับเงิน</b>
+
+🎯 <b>สร้าง QR Code:</b>
+• สำหรับรับเงินจากผู้อื่น
+• กำหนดจำนวนเงินได้
+• มีระยะเวลาหมดอายุ
+• ปลอดภัยด้วยการเข้ารหัส
+
+📋 <b>ขั้นตอน:</b>
+1. เลือกสกุลเงิน (THB/USDT)
+2. ระบุจำนวนเงิน
+3. สร้าง QR Code
+4. แชร์ให้ผู้ส่งเงิน
+
+🚧 <b>สถานะ:</b> ฟีเจอร์กำลังพัฒนา`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '💰 QR รับ THB', callback_data: 'qr_thb' },
+                      { text: '🔷 QR รับ USDT', callback_data: 'qr_usdt' }
+                    ],
+                    [
+                      { text: '🔙 กลับ', callback_data: 'send' }
+                    ]
+                  ]
+                };
+                break;
+                
+              case 'payment_link':
+                responseMessage = `🔗 <b>Payment Link</b>
+
+🌐 <b>สร้างลิงก์สำหรับรับเงิน:</b>
+• แชร์ง่ายทาง Social Media
+• รองรับหลายสกุลเงิน
+• ติดตามสถานะได้
+• กำหนดวันหมดอายุได้
+
+📋 <b>ประโยชน์:</b>
+• แชร์ใน Telegram, Line, Facebook
+• ลูกค้าจ่ายเงินง่าย
+• ติดตามการรับเงินแบบ Real-time
+
+🚧 <b>สถานะ:</b> ฟีเจอร์กำลังพัฒนา`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '🔗 สร้างลิงก์ THB', callback_data: 'link_thb' },
+                      { text: '🔗 สร้างลิงก์ USDT', callback_data: 'link_usdt' }
+                    ],
+                    [
+                      { text: '🔙 กลับ', callback_data: 'send' }
+                    ]
+                  ]
+                };
+                break;
+                
+              // Back to start
+              case 'start':
+                const startKeyboard = {
+                  inline_keyboard: [
+                    [
+                      { text: '💳 กระเป๋าเงิน', callback_data: 'wallet' },
+                      { text: '💰 ยอดเงิน', callback_data: 'balance' }
+                    ],
+                    [
+                      { text: '📤 ฝากเงิน', callback_data: 'deposit' },
+                      { text: '📥 ถอนเงิน', callback_data: 'withdraw' }
+                    ],
+                    [
+                      { text: '📨 ส่งเงิน', callback_data: 'send' },
+                      { text: '📋 ประวัติ', callback_data: 'history' }
+                    ],
+                    [
+                      { text: '🌐 เปลี่ยนภาษา', callback_data: 'change_language' },
+                      { text: '⚙️ ตั้งค่า', callback_data: 'settings' }
+                    ],
+                    [
+                      { text: '📞 ช่วยเหลือ', callback_data: 'help' }
+                    ]
+                  ]
+                };
+                
+                responseMessage = messages.welcome;
+                keyboard = startKeyboard;
+                break;
+                
+              // Additional missing handlers
+              case 'deposit_guide':
+                responseMessage = `📋 <b>คำแนะนำการฝากเงิน</b>
+
+🏦 <b>สำหรับ THB:</b>
+• ใช้โมบายแบงกิ้งหรือ Internet Banking
+• ระบุหมายเหตุการโอนให้ถูกต้อง
+• ส่งสลิปการโอนเพื่อยืนยัน
+• เงินจะเข้าภายใน 5-30 นาที
+
+🔷 <b>สำหรับ USDT:</b>
+• ใช้เฉพาะ Network ที่รองรับ
+• ตรวจสอบ Address ให้ถูกต้อง
+• รอ Network Confirmation
+• เงินจะเข้าอัตโนมัติ
+
+⚠️ <b>ข้อควรระวัง:</b>
+• ตรวจสอบข้อมูลก่อนโอน
+• เก็บหลักฐานการโอน
+• อย่าโอนจากบัญชีบุคคลอื่น`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [{ text: '🔙 กลับ', callback_data: 'deposit' }]
+                  ]
+                };
+                break;
+                
+              case 'withdraw_guide':
+                responseMessage = `📋 <b>คำแนะนำการถอนเงิน</b>
+
+💰 <b>สำหรับ THB:</b>
+• ตรวจสอบข้อมูลบัญชีธนาคาร
+• ยืนยันตัวตนด้วย PIN หรือ OTP
+• เวลาประมวลผล 1-24 ชั่วโมง
+• ค่าธรรมเนียม 10 บาท
+
+🔷 <b>สำหรับ USDT:</b>
+• ตรวจสอบ Wallet Address
+• เลือก Network ที่ถูกต้อง
+• เวลาประมวลผล 5-60 นาที
+• ค่าธรรมเนียม Network Fee
+
+🔒 <b>ความปลอดภัย:</b>
+• ยืนยันตัวตนทุกครั้ง
+• จำกัดจำนวนการถอนต่อวัน
+• แจ้งเตือนทาง Email/SMS`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [{ text: '🔙 กลับ', callback_data: 'withdraw' }]
+                  ]
+                };
+                break;
+                
+              case 'chart':
+                responseMessage = `📊 <b>กราฟยอดเงิน</b>
+
+📈 <b>สถิติการใช้งาน:</b>
+• ยอดเงินรายวัน
+• แนวโน้มการฝาก-ถอน
+• การกระจายของสกุลเงิน
+• เปรียบเทียบรายเดือน
+
+📋 <b>รายงานแบบละเอียด:</b>
+• กราฟแท่ง และ Line Chart
+• ข้อมูล 30-90 วันย้อนหลัง
+• ส่งออกเป็น PDF ได้
+
+🚧 <b>สถานะ:</b> ฟีเจอร์กำลังพัฒนา
+📱 จะเพิ่มกราฟแบบ Interactive ในเร็วๆ นี้`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [{ text: '🔙 กลับ', callback_data: 'balance' }]
+                  ]
+                };
+                break;
+                
+              case 'history_summary':
+                const summaryReport = await ctx.wallet.generateSummaryReport(ctx.userId);
+                
+                if (!summaryReport) {
+                  responseMessage = `❌ ไม่สามารถสร้างรายงานได้`;
+                } else {
+                  responseMessage = `📊 <b>รายงานสรุป</b>
+
+💰 <b>ยอดเงินปัจจุบัน:</b>
+• THB: ${formatCurrency(summaryReport.balances.THB, 'THB')}
+• USDT: ${formatCurrency(summaryReport.balances.USDT, 'USDT')}
+
+📈 <b>สถิติรวม:</b>
+• ธุรกรรมทั้งหมด: ${summaryReport.statistics.totalTransactions} ครั้ง
+• เงินฝากสะสม: ${formatCurrency(summaryReport.statistics.totalDeposits, 'THB')}
+• เงินถอนสะสม: ${formatCurrency(summaryReport.statistics.totalWithdrawals, 'THB')}
+
+📅 <b>กิจกรรมล่าสุด:</b>
+• วันนี้: ${summaryReport.recentActivity.today} ครั้ง
+• สัปดาห์นี้: ${summaryReport.recentActivity.thisWeek} ครั้ง
+• เดือนนี้: ${summaryReport.recentActivity.thisMonth} ครั้ง
+
+⏰ <b>อัพเดทล่าสุด:</b> ${new Date(summaryReport.lastUpdate).toLocaleString('th-TH')}`;
+                }
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [{ text: '🔙 กลับ', callback_data: 'history' }]
+                  ]
+                };
+                break;
+                
+              case 'export_pdf':
+                responseMessage = `📱 <b>ส่งออกรายงาน PDF</b>
+
+📋 <b>รายงานที่สามารถส่งออกได้:</b>
+• ประวัติธุรกรรมแบบละเอียด
+• รายงานยอดเงินรายเดือน
+• สรุปการใช้งานประจำปี
+• ใบเสร็จรับเงิน
+
+📧 <b>วิธีการส่ง:</b>
+• ส่งทาง Email
+• ดาวน์โหลดผ่าน Link
+• แชร์ใน Telegram
+
+🚧 <b>สถานะ:</b> ฟีเจอร์กำลังพัฒนา
+📄 จะเพิ่มระบบสร้าง PDF ในเร็วๆ นี้`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [{ text: '🔙 กลับ', callback_data: 'history' }]
+                  ]
+                };
+                break;
+                
+              case 'faq':
+                responseMessage = `❓ <b>คำถามที่พบบ่อย (FAQ)</b>
+
+🔑 <b>Q: จะเริ่มใช้งานยังไง?</b>
+A: กด /start แล้วเลือกเมนูที่ต้องการ
+
+💰 <b>Q: ฝากเงินขั้นต่ำเท่าไหร่?</b>
+A: THB ขั้นต่ำ 50 บาท, USDT ขั้นต่ำ 10 USDT
+
+🔒 <b>Q: ปลอดภัยแค่ไหน?</b>
+A: เข้ารหัสข้อมูล + ระบบรักษาความปลอดภัยขั้นสูง
+
+⏰ <b>Q: เงินเข้าใช้เวลานานไหม?</b>
+A: THB 5-30 นาที, USDT 5-60 นาที
+
+📞 <b>Q: มีปัญหาติดต่อที่ไหน?</b>
+A: @DoglcSupport หรือ support@doglc.com`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [{ text: '🔙 กลับ', callback_data: 'help' }]
+                  ]
+                };
+                break;
+                
+              case 'live_chat':
+                responseMessage = `💬 <b>แชทสดกับทีมสนับสนุน</b>
+
+👨‍💻 <b>ช่องทางการติดต่อ:</b>
+• Telegram: @DoglcSupport
+• Line: @doglc-support
+• Facebook: DOGLC Digital Wallet
+• อีเมล: support@doglc.com
+
+⏰ <b>เวลาทำการ:</b>
+• จันทร์-ศุกร์: 8:00-22:00 น.
+• เสาร์-อาทิตย์: 9:00-18:00 น.
+
+🚀 <b>ตอบกลับเร็ว:</b>
+• Telegram: ทันที
+• Line: ภายใน 5 นาที
+• อีเมล: ภายใน 2 ชั่วโมง
+
+💡 <b>เคล็ดลับ:</b> ระบุ User ID ของคุณเพื่อความรวดเร็ว`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [{ text: '🔙 กลับ', callback_data: 'help' }]
+                  ]
+                };
+                break;
+                
+              default:
+                responseMessage = `🤖 <b>ฟีเจอร์ "${data}" กำลังพัฒนา</b>
+
+🔧 เรากำลังพัฒนาฟีเจอร์นี้ให้สมบูรณ์
+⏰ จะเปิดใช้งานในเร็วๆ นี้
+
+ขอบคุณสำหรับความอดทนรอครับ! 🙏`;
+                
+                keyboard = {
+                  inline_keyboard: [
+                    [{ text: '🔙 กลับหน้าหลัก', callback_data: 'start' }]
+                  ]
+                };
+            }
+            
+            await ctx.editMessageText(responseMessage, {
+              reply_markup: keyboard,
+              parse_mode: 'HTML'
+            });
+            
+            await ctx.answerCbQuery();
+            
+          } catch (error) {
+            console.error('Callback error:', error);
+            try {
+              await ctx.answerCbQuery('❌ เกิดข้อผิดพลาด');
+            } catch (cbError) {
+              console.error('Failed to answer callback:', cbError);
+            }
+          }
+        });
+        
+        // === MESSAGE HANDLERS ===
+        bot.on('message', async (ctx) => {
+          try {
+            if (ctx.message?.text?.startsWith('/')) {
+              await ctx.reply('🤖 คำสั่งไม่รู้จัก กรุณาใช้ /start เพื่อเริ่มต้น');
+            } else {
+              // Handle regular messages (potentially for amount input, etc.)
+              await ctx.reply('💬 ได้รับข้อความแล้ว กรุณาใช้เมนูด้านล่างเพื่อใช้งาน /start');
+            }
+          } catch (error) {
+            console.error('Message error:', error);
+          }
+        });
+        
+        // Process the update
+        await bot.handleUpdate(update);
+        
+        return new Response('OK', {
+          status: 200,
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        
+      } catch (error) {
+        console.error('Webhook error:', error);
+        return new Response('Error', { status: 500 });
+      }
+    }
+    
     return new Response('Method not allowed', { status: 405 });
-
-    } catch (error) {
-      console.error('Error:', error);
-      
-      // Log error to audit system if available
-      if (env.AUDIT_LOG_KV) {
-        await env.AUDIT_LOG_KV.put(
-          `error_${Date.now()}`,
-          JSON.stringify({
-            error: error.message,
-            stack: error.stack,
-            timestamp: new Date().toISOString(),
-            url: request.url,
-            method: request.method
-          }),
-          { expirationTtl: 86400 * 30 } // Keep for 30 days instead of 7 for better debugging
-        );
-      }
-      
-      return new Response('Internal Server Error', { status: 500 });
-    }
   }
 };
-
-// API handler for MiniApp frontend requests
-async function handleAPIRequest(request, env, ctx) {
-  const url = new URL(request.url);
-  const path = url.pathname;
-  
-  // CORS headers for MiniApp
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Telegram-User-Id',
-  }; // Added missing closing brace for corsHeaders object
-  
-  // Handle preflight requests
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-  
-  try {
-    // Extract user ID from Telegram WebApp headers
-    const telegramUserId = request.headers.get('X-Telegram-User-Id');
-    
-    if (!telegramUserId) {
-      return Response.json(
-        { error: 'Unauthorized - Missing Telegram User ID' },
-        { status: 401, headers: corsHeaders }
-      );
-    }
-    
-    // Route API requests
-    if (path === '/api/wallet/balance') {
-      return await handleWalletBalance(telegramUserId, env, corsHeaders);
-    }
-    
-    if (path === '/api/wallet/transactions') {
-      return await handleTransactionHistory(telegramUserId, env, corsHeaders);
-    }
-    
-    if (path === '/api/market/data') {
-      return await handleMarketData(env, corsHeaders);
-    }
-    
-    if (path === '/api/user/profile') {
-      return await handleUserProfile(telegramUserId, env, corsHeaders);
-    }
-    
-    if (path.startsWith('/api/wallet/send') && request.method === 'POST') {
-      return await handleSendMoney(request, telegramUserId, env, corsHeaders);
-    }
-    
-    if (path.startsWith('/api/wallet/receive')) {
-      return await handleReceiveMoney(telegramUserId, env, corsHeaders);
-    }
-    
-    // 404 for unknown API endpoints
-    return Response.json(
-      { error: 'API endpoint not found' },
-      { status: 404, headers: corsHeaders }
-    );
-    
-  } catch (error) {
-    console.error('API Request Error:', error);
-    return Response.json(
-      { error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
-    );
-  }
-} // Added missing closing brace for handleAPIRequest function
-
-// API endpoint handlers for MiniApp
-async function handleWalletBalance(userId, env, corsHeaders) {
-  try {
-    // Get user wallet data from KV storage
-    const walletKey = `wallet_${userId}`;
-    const walletData = await env.USER_SESSIONS?.get(walletKey);
-    
-    const balance = walletData ? JSON.parse(walletData) : {
-      thb: 0,
-      usd: 0,
-      eur: 0,
-      total_thb: 0
-    };
-    
-    return Response.json({
-      success: true,
-      data: {
-        balances: balance,
-        last_updated: new Date().toISOString()
-      }
-    }, { headers: corsHeaders });
-    
-  } catch (error) {
-    console.error('Wallet balance error:', error);
-    return Response.json(
-      { error: 'Failed to fetch wallet balance' },
-      { status: 500, headers: corsHeaders }
-    );
-  }
-}
-
-async function handleTransactionHistory(userId, env, corsHeaders) {
-  try {
-    // Get transaction history from KV storage
-    const historyKey = `history_${userId}`;
-    const historyData = await env.USER_SESSIONS?.get(historyKey);
-    
-    const transactions = historyData ? JSON.parse(historyData) : [];
-    
-    return Response.json({
-      success: true,
-      data: {
-        transactions: transactions.slice(0, 20), // Last 20 transactions
-        total_count: transactions.length
-      }
-    }, { headers: corsHeaders });
-    
-  } catch (error) {
-    console.error('Transaction history error:', error);
-    return Response.json(
-      { error: 'Failed to fetch transaction history' },
-      { status: 500, headers: corsHeaders }
-    );
-  }
-}
-
-async function handleMarketData(env, corsHeaders) {
-  try {
-    // Get cached market data or fetch from external API
-    const marketKey = 'market_data_cache';
-    let marketData = await env.USER_SESSIONS?.get(marketKey);
-    
-    if (!marketData) {
-      // Mock market data - replace with real API calls
-      marketData = JSON.stringify({
-        thb_usd: 0.027,
-        thb_eur: 0.025,
-        usd_eur: 0.92,
-        trends: {
-          thb_usd: 1.2,
-          thb_eur: -0.8,
-          usd_eur: 0.5
-        },
-        last_updated: new Date().toISOString()
-      });
-      
-      // Cache for 5 minutes
-      await env.USER_SESSIONS?.put(marketKey, marketData, { expirationTtl: 300 });
-    }
-    
-    return Response.json({
-      success: true,
-      data: JSON.parse(marketData)
-    }, { headers: corsHeaders });
-    
-  } catch (error) {
-    console.error('Market data error:', error);
-    return Response.json(
-      { error: 'Failed to fetch market data' },
-      { status: 500, headers: corsHeaders }
-    );
-  }
-}
-
-async function handleUserProfile(userId, env, corsHeaders) {
-  try {
-    // Get user profile from KV storage
-    const profileKey = `profile_${userId}`;
-    const profileData = await env.USER_SESSIONS?.get(profileKey);
-    
-    const profile = profileData ? JSON.parse(profileData) : {
-      user_id: userId,
-      username: 'User',
-      language: 'th',
-      vip_level: 'Basic',
-      join_date: new Date().toISOString(),
-      total_transactions: 0
-    };
-    
-    return Response.json({
-      success: true,
-      data: profile
-    }, { headers: corsHeaders });
-    
-  } catch (error) {
-    console.error('User profile error:', error);
-    return Response.json(
-      { error: 'Failed to fetch user profile' },
-      { status: 500, headers: corsHeaders }
-    );
-  }
-}
-
-async function handleSendMoney(request, userId, env, corsHeaders) {
-  try {
-    const requestData = await request.json();
-    const { amount, currency, recipient } = requestData;
-    
-    // Validate request data
-    if (!amount || !currency || !recipient) {
-      return Response.json(
-        { error: 'Missing required fields: amount, currency, recipient' },
-        { status: 400, headers: corsHeaders }
-      );
-    }
-    
-    // Check user balance
-    const walletKey = `wallet_${userId}`;
-    const walletData = await env.USER_SESSIONS?.get(walletKey);
-    const balance = walletData ? JSON.parse(walletData) : {};
-    
-    if (!balance[currency] || balance[currency] < amount) {
-      return Response.json(
-        { error: 'Insufficient balance' },
-        { status: 400, headers: corsHeaders }
-      );
-    }
-    
-    // Create transaction record
-    const transaction = {
-      id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      type: 'send',
-      amount: amount,
-      currency: currency,
-      recipient: recipient,
-      status: 'pending',
-      timestamp: new Date().toISOString(),
-      user_id: userId
-    };
-    
-    // Store transaction (in real app, this would be processed by banking system)
-    const historyKey = `history_${userId}`;
-    const historyData = await env.USER_SESSIONS?.get(historyKey);
-    const transactions = historyData ? JSON.parse(historyData) : [];
-    transactions.unshift(transaction);
-    
-    await env.USER_SESSIONS?.put(historyKey, JSON.stringify(transactions));
-    
-    return Response.json({
-      success: true,
-      data: {
-        transaction_id: transaction.id,
-        status: 'pending',
-        message: 'Transaction initiated successfully'
-      }
-    }, { headers: corsHeaders });
-    
-  } catch (error) {
-    console.error('Send money error:', error);
-    return Response.json(
-      { error: 'Failed to process transaction' },
-      { status: 500, headers: corsHeaders }
-    );
-  }
-}
-
-async function handleReceiveMoney(userId, env, corsHeaders) {
-  try {
-    // Generate QR code data for receiving money
-    const receiveData = {
-      user_id: userId,
-      wallet_address: `doglc_${userId}_${Date.now()}`,
-      qr_code: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=doglc_${userId}`,
-      expires_at: new Date(Date.now() + 3600000).toISOString() // 1 hour
-    };
-    
-    return Response.json({
-      success: true,
-      data: receiveData
-    }, { headers: corsHeaders });
-    
-  } catch (error) {
-    console.error('Receive money error:', error);
-    return Response.json(
-      { error: 'Failed to generate receive data' },
-      { status: 500, headers: corsHeaders }
-    );
-  }
-}
-
-// ===========================
-// ENHANCED HANDLER FUNCTIONS
-// ===========================
-
-/**
- * Handle language selection display
- */
-async function handleLanguageSelection(ctx) {
-  const keyboard = {
-    inline_keyboard: [
-      [
-        { text: '🇹🇭 ไทย', callback_data: 'lang_th' },
-        { text: '🇺🇸 English', callback_data: 'lang_en' }
-      ],
-      [
-        { text: '🇨🇳 中文', callback_data: 'lang_zh' },
-        { text: '🇰🇭 ខ្មែរ', callback_data: 'lang_km' }
-      ],
-      [
-        { text: '🇰🇷 한국어', callback_data: 'lang_ko' },
-        { text: '🇮🇩 Indonesia', callback_data: 'lang_id' }
-      ],
-      [
-        { text: '🔙 Back', callback_data: 'start' }
-      ]
-    ]
-  };
-
-  await ctx.editMessageText('🌐 เลือกภาษา / Choose Language:', {
-    reply_markup: keyboard
-  });
-}
-
-/**
- * Handle THB deposit flow
- */
-async function handleTHBDeposit(ctx) {
-  const userId = ctx.from.id.toString();
-  
-  const keyboard = {
-    inline_keyboard: [
-      [
-        { text: '💸 100 บาท', callback_data: 'deposit_100' },
-        { text: '💸 500 บาท', callback_data: 'deposit_500' }
-      ],
-      [
-        { text: '💸 1,000 บาท', callback_data: 'deposit_1000' },
-        { text: '💸 5,000 บาท', callback_data: 'deposit_5000' }
-      ],
-      [
-        { text: '💰 จำนวนอื่น / Other Amount', callback_data: 'deposit_custom' }
-      ],
-      [
-        { text: '🔙 กลับ / Back', callback_data: 'wallet' }
-      ]
-    ]
-  };
-
-  const depositMessage = `
-💳 <b>${messages.depositTHB || 'THB Deposit'}</b>
-
-เลือกจำนวนเงินที่ต้องการฝาก:
-Choose the amount you want to deposit:
-
-📊 <b>ข้อมูลบัญชี / Account Info:</b>
-• ธนาคาร: กสิกรไทย (KBank)
-• เลขบัญชี: 123-4-56789-0
-• ชื่อบัญชี: DOGLC Digital Wallet
-
-⚡ ค่าธรรมเนียม: 2% (ขั้นต่ำ 10 บาท)
-⚡ Fee: 2% (Minimum 10 THB)
-
-⏰ เวลาดำเนินการ: 5-30 นาที
-⏰ Processing Time: 5-30 minutes
-  `;
-
-  await ctx.editMessageText(depositMessage, {
-    reply_markup: keyboard,
-    parse_mode: 'HTML'
-  });
-
-  // Set user state for deposit flow
-  await setUserState(userId, {
-    action: 'selecting_deposit_amount',
-    flow: 'thb_deposit',
-    started_at: new Date().toISOString()
-  }, env, 1800); // 30 minutes
-}
-
-/**
- * Handle deposit amount selection
- */
-async function handleDepositAmount(ctx, amount, env) {
-  const userId = ctx.from.id.toString();
-  
-  // Validate amount
-  let depositAmount;
-  if (amount === 'custom') {
-    await ctx.editMessageText(
-      '💰 กรุณาพิมพ์จำนวนเงินที่ต้องการฝาก (100-50,000 บาท)\n' +
-      '💰 Please enter the amount you want to deposit (100-50,000 THB):',
-      { parse_mode: 'HTML' }
-    );
-    
-    await setUserState(userId, {
-      action: 'awaiting_custom_amount',
-      flow: 'thb_deposit'
-    }, env, 1800);
-    return;
-  } else {
-    depositAmount = parseInt(amount);
-  }
-
-  // Validate amount range
-  if (depositAmount < 100 || depositAmount > 50000) {
-    await ctx.editMessageText(
-      '❌ จำนวนเงินไม่ถูกต้อง (100-50,000 บาท)\n' +
-      '❌ Invalid amount (100-50,000 THB)'
-    );
-    return;
-  }
-
-  const fee = calculateFee(depositAmount);
-  const totalAmount = depositAmount + fee;
-
-  const confirmMessage = `
-💳 <b>ยืนยันการฝากเงิน / Confirm Deposit</b>
-
-💰 จำนวนฝาก / Amount: ${formatCurrency(depositAmount, ctx.userLanguage)}
-💸 ค่าธรรมเนียม / Fee: ${formatCurrency(fee, ctx.userLanguage)}
-📊 รวมทั้งหมด / Total: ${formatCurrency(totalAmount, ctx.userLanguage)}
-
-🏦 <b>ข้อมูลการโอน / Transfer Details:</b>
-• ธนาคาร: กสิกรไทย (KBank)
-• เลขบัญชี: 123-4-56789-0
-• ชื่อบัญชี: DOGLC Digital Wallet
-• จำนวน: ${formatCurrency(totalAmount, ctx.userLanguage)}
-
-📝 <b>หมายเหตุ / Reference:</b> DG${Date.now().toString().slice(-8)}
-
-⚠️ กรุณาโอนเงินตามจำนวนที่ระบุ และส่งสลิปโอนเงินมาเพื่อยืนยัน
-⚠️ Please transfer the exact amount and send the slip for verification
-  `;
-
-  const keyboard = {
-    inline_keyboard: [
-      [
-        { text: '✅ ยืนยัน / Confirm', callback_data: `confirm_deposit_${depositAmount}` }
-      ],
-      [
-        { text: '📸 ส่งสลิป / Upload Slip', callback_data: 'upload_slip' }
-      ],
-      [
-        { text: '🔙 กลับ / Back', callback_data: 'deposit_thb' }
-      ]
-    ]
-  };
-
-  await ctx.editMessageText(confirmMessage, {
-    reply_markup: keyboard,
-    parse_mode: 'HTML'
-  });
-
-  // Update user state
-  await setUserState(userId, {
-    action: 'awaiting_slip',
-    flow: 'thb_deposit',
-    amount: depositAmount,
-    fee: fee,
-    total_amount: totalAmount,
-    reference: `DG${Date.now().toString().slice(-8)}`,
-    created_at: new Date().toISOString()
-  }, env, 3600); // 1 hour
-}
-
-/**
- * Handle slip photo upload (Enhanced Version)
- */
-async function handleSlipPhotoUpload(ctx, env) {
-  // Use optimized version for better performance
-  return await handleSlipPhotoUploadOptimized(ctx, env);
-}
-
-/**
- * Process slip with OCR (Enhanced with optimized processing)
- */
-async function processSlipOCR(imageUrl, userState, env) {
-  // Enhanced OCR processing with optimized performance
-  try {
-    await logUserActivity(userState.user_id, {
-      action: 'slip_ocr_processing',
-      image_url_hash: hashUserId(imageUrl),
-      expected_amount: userState.amount,
-      processing_version: 'optimized_v2'
-    }, env);
-
-    // Simulate enhanced OCR with better accuracy
-    const enhancedResult = {
-      verified: Math.random() > 0.2, // 80% success rate (better than before)
-      confidence: 0.85 + Math.random() * 0.1,
-      amount: userState.amount,
-      processingTime: 500 + Math.random() * 1000, // Faster processing
-      method: 'enhanced_ocr_v2'
-    };
-
-    return enhancedResult;
-  } catch (error) {
-    console.error('Enhanced OCR processing error:', error);
-    return {
-      verified: false,
-      error: error.message,
-      method: 'enhanced_ocr_v2'
-    };
-  }
-}
-
-/**
- * Handle USDT withdrawal flow
- */
-async function handleUSDTWithdraw(ctx) {
-  
-  const withdrawMessage = `
-💸 <b>ถอน USDT / USDT Withdrawal</b>
-
-⚠️ <b>ข้อกำหนด / Requirements:</b>
-• ยอดขั้นต่ำ / Minimum: 10 USDT
-• ยอดสูงสุด / Maximum: 10,000 USDT
-• ค่าธรรมเนียม / Fee: 2 USDT
-• เครือข่าย / Network: TRON (TRC20)
-
-💡 <b>ขั้นตอน / Steps:</b>
-1. ใส่ที่อยู่ USDT (TRC20)
-2. ระบุจำนวนที่ต้องการถอน
-3. ยืนยันการทำรายการ
-4. รอรับเงินภายใน 10-30 นาที
-
-🔒 ระบบรักษาความปลอดภัยขั้นสูง
-🔒 Advanced security system
-
-📝 กรุณาตรวจสอบที่อยู่ให้ถูกต้อง เพราะไม่สามารถยกเลิกได้
-📝 Please verify address carefully as transactions cannot be reversed
-  `;
-
-  const keyboard = {
-    inline_keyboard: [
-      [
-        { text: '🚀 เริ่มถอน / Start Withdrawal', callback_data: 'start_withdraw' }
-      ],
-      [
-        { text: '🔙 กลับ / Back', callback_data: 'wallet' }
-      ]
-    ]
-  };
-
-  await ctx.editMessageText(withdrawMessage, {
-    reply_markup: keyboard,
-    parse_mode: 'HTML'
-  });
-}
-
-// Helper functions imported at top of file
